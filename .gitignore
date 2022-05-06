@@ -1,4 +1,6 @@
 .nova/
+.nova
 .luacheckrc
 *.py
 *.csv
+.DS_Store
