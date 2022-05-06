@@ -1,8 +1,6 @@
-import "CoreLibs/object"
+-- import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
-
--- import "smallBoxClass"
 
 local gfx <const> = playdate.graphics
 
@@ -14,82 +12,6 @@ status = {
 
 
 
-class('Board').extends(gfx.sprite)
-
-function Board:init(template)
-    self.boxs = {}
-    self.rows = {{}, {}, {}, {}, {}, {}, {}, {}, {}}
-    self.columns = {{}, {}, {}, {}, {}, {}, {}, {}, {}}
-    self.bigBoxs = {{}, {}, {}, {}, {}, {}, {}, {}, {}}
-    for r=1, 9 do
-        for c=1, 9 do
-            n = (c) + ((r-1) * 9)
-            local b = {
-                ["row"]=r,
-                ["column"]=c,
-                ["number"]=template[n] ~= "." and template[n] or 0,
-                ["status"]=template[n]  ~= "." and status["Given"] or status["Empty"],
-                ["bigBox"]=findBigBoxGivenRowAndColumn(r,c)
-            }
-            table.insert(self.boxs,b)
-            table.insert(self.rows[b.row],b)
-            table.insert(self.columns[b.column],b)
-            table.insert(self.bigBoxs[b.bigBox],b)
-        end
-    end
-    self.selected = self.boxs[1]
-end
-
-
-
-
-
-function Board:draw(x, y, width, height)
-    local thickLineWidth, thinLineWidth = 5, 1
-    local smallBoxWidth, smallBoxHeight = width/9, height/9
-    
-    gfx.setLineWidth(thickLineWidth)
-    -- gfx.setColor(gfx.kColorBlack)
-    gfx.drawRect(0, 0, width, height)
-    -- Draw Thick Lines
-    gfx.drawLine(0,height/3,width,height/3)
-    gfx.drawLine(0,2*height/3,width,2*height/3)
-    gfx.drawLine(width/3,0,width/3,height)
-    gfx.drawLine(2*width/3,0,2*width/3,height)
-    -- Draw Thin Lines
-    gfx.setLineWidth(thinLineWidth)
-    gfx.drawLine(0,(1*height)/9,width,(1*height)/9)
-    gfx.drawLine(0,(2*height)/9,width,(2*height)/9)
-    gfx.drawLine(0,(4*height)/9,width,(4*height)/9)
-    gfx.drawLine(0,(5*height)/9,width,(5*height)/9)
-    gfx.drawLine(0,(7*height)/9,width,(7*height)/9)
-    gfx.drawLine(0,(8*height)/9,width,(8*height)/9)
-    gfx.drawLine((1*width)/9,0,(1*width)/9,height)
-    gfx.drawLine((2*width)/9,0,(2*width)/9,height)
-    gfx.drawLine((4*width)/9,0,(4*width)/9,height)
-    gfx.drawLine((5*width)/9,0,(5*width)/9,height)
-    gfx.drawLine((7*width)/9,0,(7*width)/9,height)
-    gfx.drawLine((8*width)/9,0,(8*width)/9,height)
-    gfx.setColor(gfx.kColorBlack)
-    
-    local selectedx, selectedy = ((self.selected.column-1)*smallBoxWidth), ((self.selected.row-1)*smallBoxHeight)
-    playdate.graphics.fillRect(selectedx, selectedy, smallBoxWidth+1, smallBoxHeight+1)
-    for index=1, 81 do
-        local sbx = ((self.boxs[index].column-1)*smallBoxWidth)
-        local sby = ((self.boxs[index].row-1)*smallBoxHeight)
-        local text = self.boxs[index].number ~= 0 and self.boxs[index].number or ''
-        if self.boxs[index].status == status["Given"] then
-            local textWidth = gfx.getTextSize("*"..text)
-            local textHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()
-            gfx.drawText("*"..text, sbx + (smallBoxWidth/2 - textWidth/2), sby+(smallBoxHeight - textHeight)) 
-        else
-            local textWidth = gfx.getTextSize(text)
-            local textHeight = gfx.getFont():getHeight()
-            gfx.drawText(text,sbx+ (smallBoxWidth/2 - textWidth/2),sby+(smallBoxHeight - textHeight))
-            -- gfx.drawText(text, sbx + (smallBoxWidth/2 - textWidth/2), sby-(smallBoxHeight + textHeight))
-        end
-    end
-end
 
 
 
@@ -194,12 +116,3 @@ function findBigBoxGivenRowAndColumn(row,column)
     end
 end
 
--- function Board:printboard()
---     for r=1, 9 do
---         local row = ''
---         for c=1, 9 do
---             row = row .. self.rows[r][c].number .. ' '
---         end
---         print(row)
---     end
--- end

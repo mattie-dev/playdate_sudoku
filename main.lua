@@ -35,9 +35,9 @@ puzzleCount = nil
 simple_file = nil
 simple_json = nil
 
-local mainBoard = Board(simple_template)
-
--- mainBoard:printboard()
+local mainBoard = gfx.sprite.new()
+mainBoard.boardData = generateBoard(simple_template)
+setDrawForBoardSprite(mainBoard)
 
 
 function myGameSetUp()
@@ -92,8 +92,8 @@ if playdate.buttonIsPressed( playdate.kButtonUp ) then
     if upCanBePressed then
         upCanBePressed = false
         playdate.timer.new(movespeed,setUpCanBePressedToTrue)
-        if mainBoard.selected.row ~= 1 then
-            mainBoard.selected = mainBoard.rows[mainBoard.selected.row -1][mainBoard.selected.column]
+        if mainBoard.boardData.selected.row ~= 1 then
+            mainBoard.boardData.selected = mainBoard.boardData.rows[mainBoard.boardData.selected.row -1][mainBoard.boardData.selected.column]
             mainBoard:markDirty()
         end
     end
@@ -102,8 +102,8 @@ if playdate.buttonIsPressed( playdate.kButtonRight ) then
     if rightCanBePressed then
         rightCanBePressed = false
         playdate.timer.new(movespeed,setRightCanBePressedToTrue)
-        if mainBoard.selected.column ~= 9 then
-            mainBoard.selected = mainBoard.columns[mainBoard.selected.column +1][mainBoard.selected.row]
+        if mainBoard.boardData.selected.column ~= 9 then
+            mainBoard.boardData.selected = mainBoard.boardData.columns[mainBoard.boardData.selected.column +1][mainBoard.boardData.selected.row]
             mainBoard:markDirty()
         end
     end
@@ -112,8 +112,8 @@ if playdate.buttonIsPressed( playdate.kButtonDown ) then
     if downCanBePressed then
         downCanBePressed = false
         playdate.timer.new(movespeed,setDownCanBePressedToTrue)
-        if mainBoard.selected.row ~= 9 then
-            mainBoard.selected = mainBoard.rows[mainBoard.selected.row +1][mainBoard.selected.column]
+        if mainBoard.boardData.selected.row ~= 9 then
+            mainBoard.boardData.selected = mainBoard.boardData.rows[mainBoard.boardData.selected.row +1][mainBoard.boardData.selected.column]
             mainBoard:markDirty()
         end
     end
@@ -122,8 +122,8 @@ if playdate.buttonIsPressed( playdate.kButtonLeft ) then
     if leftCanBePressed then
         leftCanBePressed = false
         playdate.timer.new(movespeed,setLeftCanBePressedToTrue)
-        if mainBoard.selected.column ~= 1 then
-            mainBoard.selected = mainBoard.columns[mainBoard.selected.column - 1][mainBoard.selected.row]
+        if mainBoard.boardData.selected.column ~= 1 then
+            mainBoard.boardData.selected = mainBoard.boardData.columns[mainBoard.boardData.selected.column - 1][mainBoard.boardData.selected.row]
             mainBoard:markDirty()
         end
     end
@@ -132,10 +132,11 @@ if playdate.buttonIsPressed( playdate.kButtonA ) then
     if ACanBePressed then
         ACanBePressed = false
         playdate.timer.new(movespeed,setACanBePressedToTrue)
-        if mainBoard.selected.status == status["Empty"] or mainBoard.selected.status == status["Guessed"] then
+        print(mainBoard.boardData.selected.status)
+        if mainBoard.boardData.selected.status == status["Empty"] or mainBoard.boardData.selected.status == status["Guessed"] then
             
-            if mainBoard.selected.number ~= 9 then
-                mainBoard.selected.number = mainBoard.selected.number + 1
+            if mainBoard.boardData.selected.number ~= 9 then
+                mainBoard.boardData.selected.number = mainBoard.boardData.selected.number + 1
                 mainBoard:markDirty()
             end
         end
@@ -145,10 +146,10 @@ if playdate.buttonIsPressed( playdate.kButtonB ) then
     if BCanBePressed then
         BCanBePressed = false
         playdate.timer.new(movespeed,setBCanBePressedToTrue)
-        if mainBoard.selected.status == status["Empty"] or mainBoard.selected.status == status["Guessed"] then
-            if mainBoard.selected.number ~= 0 then
+        if mainBoard.boardData.selected.status == status["Empty"] or mainBoard.boardData.selected.status == status["Guessed"] then
+            if mainBoard.boardData.selected.number ~= 0 then
                 mainBoard:markDirty()
-                mainBoard.selected.number = mainBoard.selected.number - 1
+                mainBoard.boardData.selected.number = mainBoard.boardData.selected.number - 1
             end
         end
     end
