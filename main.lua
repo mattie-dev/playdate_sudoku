@@ -40,6 +40,7 @@ mainBoard.boardData = generateBoard(simple_template)
 setDrawForBoardSprite(mainBoard)
 
 
+
 function myGameSetUp()
     local midpointx, midpointy = playdate.display.getWidth() / 2, playdate.display.getHeight() / 2
     local boardSize = playdate.display.getHeight() *.95
@@ -50,36 +51,84 @@ end
 
 myGameSetUp()
 
-local upCanBePressed = true
-function setUpCanBePressedToTrue()
-    upCanBePressed = true
+local buttonCanBePressed = {
+    ["up"] = true,
+    ["down"] = true,
+    ["left"] = true,
+    ["right"] = true,
+    ["a"] = true,
+    ["b"] = true
+}
+function setBoolToTrue(bool)
+    buttonCanBePressed[bool] = true
 end
-local downCanBePressed = true
-function setDownCanBePressedToTrue()
-    downCanBePressed = true
-end
-local leftCanBePressed = true
-function setLeftCanBePressedToTrue()
-    leftCanBePressed = true
-end
-local rightCanBePressed = true
-function setRightCanBePressedToTrue()
-    rightCanBePressed = true
-end
-local ACanBePressed = true
-function setACanBePressedToTrue()
-    ACanBePressed = true
-end
-local BCanBePressed = true
-function setBCanBePressedToTrue()
-    BCanBePressed = true
-end
+
 
 local movespeed = 200
 
 
 
+function moveSelected(bool,rowMove, columnMove,board)
+    if buttonCanBePressed[bool] then
+        buttonCanBePressed[bool] = false
+        playdate.timer.new(movespeed,setBoolToTrue,bool)
+        local newRow = board.boardData.selected.row + rowMove
+        if newRow <1 then
+            newRow = 1
+        elseif newRow > 9 then
+            newRow = 9
+        end
+        local newColumn = board.boardData.selected.column + columnMove
+        if newColumn <1 then
+            newColumn = 1
+        elseif newColumn > 9 then
+            newColumn = 9
+        end
+        board.boardData.selected = board.boardData.rows[newRow][newColumn]
+        board:markDirty()
+    end
+end
 
+function incrementSelected(bool,amountToAdd, board)
+  if buttonCanBePressed[bool] then
+      buttonCanBePressed[bool] = false
+      playdate.timer.new(movespeed,setBoolToTrue,bool)
+      if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
+          local newNumber = board.boardData.selected.number + amountToAdd
+          board.boardData.selected.status = status["Guessed"]
+          if newNumber > 9 then
+              newNumber = 9
+          elseif newNumber <= 0 then
+              newNumber = 0
+              board.boardData.selected.status = status["Empty"]
+          end
+          board.boardData.selected.number = newNumber
+          
+          board:markDirty()
+      end
+  end  
+end
+
+function handleButtonsforBoard(board)
+    if playdate.buttonIsPressed( playdate.kButtonUp ) then
+        moveSelected('up', -1, 0, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonRight ) then
+        moveSelected('right', 0, 1, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonDown ) then
+        moveSelected('down', 1, 0, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonLeft ) then
+        moveSelected('left', 0, -1, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonA ) then
+        incrementSelected('a',1, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonB ) then
+        incrementSelected('b',-1, board)
+    end
+end
 
 
 
@@ -88,74 +137,7 @@ local movespeed = 200
 
 function playdate.update()
 
-if playdate.buttonIsPressed( playdate.kButtonUp ) then
-    if upCanBePressed then
-        upCanBePressed = false
-        playdate.timer.new(movespeed,setUpCanBePressedToTrue)
-        if mainBoard.boardData.selected.row ~= 1 then
-            mainBoard.boardData.selected = mainBoard.boardData.rows[mainBoard.boardData.selected.row -1][mainBoard.boardData.selected.column]
-            mainBoard:markDirty()
-        end
-    end
-end
-if playdate.buttonIsPressed( playdate.kButtonRight ) then
-    if rightCanBePressed then
-        rightCanBePressed = false
-        playdate.timer.new(movespeed,setRightCanBePressedToTrue)
-        if mainBoard.boardData.selected.column ~= 9 then
-            mainBoard.boardData.selected = mainBoard.boardData.columns[mainBoard.boardData.selected.column +1][mainBoard.boardData.selected.row]
-            mainBoard:markDirty()
-        end
-    end
-end
-if playdate.buttonIsPressed( playdate.kButtonDown ) then
-    if downCanBePressed then
-        downCanBePressed = false
-        playdate.timer.new(movespeed,setDownCanBePressedToTrue)
-        if mainBoard.boardData.selected.row ~= 9 then
-            mainBoard.boardData.selected = mainBoard.boardData.rows[mainBoard.boardData.selected.row +1][mainBoard.boardData.selected.column]
-            mainBoard:markDirty()
-        end
-    end
-end
-if playdate.buttonIsPressed( playdate.kButtonLeft ) then
-    if leftCanBePressed then
-        leftCanBePressed = false
-        playdate.timer.new(movespeed,setLeftCanBePressedToTrue)
-        if mainBoard.boardData.selected.column ~= 1 then
-            mainBoard.boardData.selected = mainBoard.boardData.columns[mainBoard.boardData.selected.column - 1][mainBoard.boardData.selected.row]
-            mainBoard:markDirty()
-        end
-    end
-end
-if playdate.buttonIsPressed( playdate.kButtonA ) then
-    if ACanBePressed then
-        ACanBePressed = false
-        playdate.timer.new(movespeed,setACanBePressedToTrue)
-        print(mainBoard.boardData.selected.status)
-        if mainBoard.boardData.selected.status == status["Empty"] or mainBoard.boardData.selected.status == status["Guessed"] then
-            
-            if mainBoard.boardData.selected.number ~= 9 then
-                mainBoard.boardData.selected.number = mainBoard.boardData.selected.number + 1
-                mainBoard:markDirty()
-            end
-        end
-    end
-end
-if playdate.buttonIsPressed( playdate.kButtonB ) then
-    if BCanBePressed then
-        BCanBePressed = false
-        playdate.timer.new(movespeed,setBCanBePressedToTrue)
-        if mainBoard.boardData.selected.status == status["Empty"] or mainBoard.boardData.selected.status == status["Guessed"] then
-            if mainBoard.boardData.selected.number ~= 0 then
-                mainBoard:markDirty()
-                mainBoard.boardData.selected.number = mainBoard.boardData.selected.number - 1
-            end
-        end
-    end
-end
-    
-    
+    handleButtonsforBoard(mainBoard)
     gfx.sprite.update()
     playdate.timer.updateTimers()
 
