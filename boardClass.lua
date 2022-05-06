@@ -1,12 +1,9 @@
 import "CoreLibs/object"
-import "CoreLibs/graphics"
 import "CoreLibs/sprites"
-import "CoreLibs/timer"
-
 import "smallBoxClass"
 
 
--- local gfx <const> = playdate.graphics
+
 
 
 
@@ -30,12 +27,12 @@ function Board:init(template)
     self.selected = self.boxs[1]
 end
 
-function Board:printboard()
-    for r=1, 9 do
-        local row = ''
-        for c=1, 9 do
-            row = row .. self.rows[r][c].number .. ' '
-        end
-        print(row)
-    end
-end
+-- function Board:printboard()
+--     for r=1, 9 do
+--         local row = ''
+--         for c=1, 9 do
+--             row = row .. self.rows[r][c].number .. ' '
+--         end
+--         print(row)
+--     end
+-- end

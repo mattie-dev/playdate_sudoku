@@ -1,7 +1,6 @@
 import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
-import "CoreLibs/timer"
 
 local gfx <const> = playdate.graphics
 
@@ -21,24 +20,22 @@ function smallBox:init(irow,icolumn,inumber,iboard)
     self.status = self.number ~= 0 and status["Given"] or status["Empty"]
     self.bigBox = findBigBoxGivenRowAndColumn(self.row,self.column)
     self.board = iboard
-    -- print('r' .. self.row .. "c" .. self.column .. '= ' .. self.number .. ', bb=' .. self.bigBox)
+    
 end
 
 
 
-function smallBox:getAsString()
-    return 'r' .. self.row .. "c" .. self.column .. '= ' .. self.number .. ', bb=' .. self.bigBox
-end
+-- function smallBox:getAsString()
+--     return 'r' .. self.row .. "c" .. self.column .. '= ' .. self.number .. ', bb=' .. self.bigBox
+-- end
+-- 
+-- function smallBox:printBox()
+--     print(self.getAsString())
+-- end
 
-function smallBox:printBox()
-    print(self.getAsString())
-end
-
-function smallBox:update()
-    -- local width, height = self:getSize()
-    -- local x, y = self:getPosition()
-    -- self:draw(x, y, width, height)
-end
+-- function smallBox:update()
+-- 
+-- end
 
 function smallBox:draw(x, y, width, height)
     local text = self.number ~= 0 and self.number or ''

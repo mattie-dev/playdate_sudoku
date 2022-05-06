@@ -5,6 +5,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 
+
 import "smallBoxClass"
 import "boardClass"
 
@@ -13,14 +14,17 @@ local gfx <const> = playdate.graphics
 
 getmetatable('').__index = function(str,i) return string.sub(str,i,i) end
 
-local playerSprite = nil
 
-local simple_template = '.34....7.......36.71.....28..25.7...57.....1...38..5..82..6........7.14.6..1....3'
--- local simple_file = playdate.file.open("simple.json")
--- local simple_json = json.decodeFile(simple_file)
--- math.randomseed(playdate.getSecondsSinceEpoch())
--- local puzzle_index = math.random(0,99)
--- simple_template = simple_json[""..puzzle_index..""]
+-- local simple_template = '.34....7.......36.71.....28..25.7...57.....1...38..5..82..6........7.14.6..1....3'
+local simple_file = playdate.file.open("puzzles/simple.json")
+local simple_json = json.decodeFile(simple_file)
+math.randomseed(playdate.getSecondsSinceEpoch())
+local _, puzzleCount = table.getsize(simple_json)
+local puzzle_index = math.random(0,puzzleCount)
+simple_template = simple_json[""..puzzle_index..""]
+puzzleCount = nil
+simple_file = nil
+simple_json = nil
 
 local mainBoard = Board(simple_template)
 -- mainBoard:printboard()
