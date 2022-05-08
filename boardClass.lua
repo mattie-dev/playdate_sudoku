@@ -1,6 +1,7 @@
 -- import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
+import "CoreLibs/timer"
 
 local gfx <const> = playdate.graphics
 
@@ -42,8 +43,19 @@ function generateBoard(template)
         end
     end
     board.selected = board.boxs[1]
+    board.buttonCanBePressed = {
+        ["up"] = true,
+        ["down"] = true,
+        ["left"] = true,
+        ["right"] = true,
+        ["a"] = false,
+        ["b"] = true
+    }
+    playdate.timer.new(movespeed,setBoolToTrue, "a", board)
     return board
 end
+
+
 
 function setDrawForBoardSprite(boardSprite)
     function boardSprite:draw(x, y, width, height)
@@ -85,14 +97,39 @@ function setDrawForBoardSprite(boardSprite)
                 local textWidth = gfx.getTextSize(text)
                 local textHeight = gfx.getFont():getHeight()
                 gfx.drawText(text,sbx+ (smallBoxWidth/2 - textWidth/2),sby+(smallBoxHeight - textHeight))
-                -- gfx.drawText(text, sbx + (smallBoxWidth/2 - textWidth/2), sby-(smallBoxHeight + textHeight))
             end
+            highlightSameNumber(self, index, thickLineWidth, sbx, sby, smallBoxWidth, smallBoxHeight)
+            indicateSpotsNumberCanNotGo(self, index, sbx, sby, smallBoxWidth, smallBoxHeight)
         end
     end
     return boardSprite
 end
 
 
+function highlightSameNumber(board, index, thickLineWidth, sbx, sby, smallBoxWidth, smallBoxHeight)
+    if tonumber(board.boardData.selected.number) == tonumber(board.boardData.boxs[index].number) and board.boardData.selected.number ~= 0 then
+        gfx.drawRoundRect(sbx + thickLineWidth/2  , sby + thickLineWidth/2, smallBoxWidth - thickLineWidth, smallBoxHeight - thickLineWidth,2)
+    end
+end
+
+
+function indicateSpotsNumberCanNotGo(board, index, sbx, sby, smallBoxWidth, smallBoxHeight)
+    if board.boardData.boxs[index].status == status["Empty"] and board.boardData.selected.status ~= status["Empty"] then
+        local shouldDraw = false
+        for j=1, 9 do
+            local r = board.boardData.rows[board.boardData.boxs[index].row][j]
+            local c = board.boardData.columns[board.boardData.boxs[index].column][j]
+            local bb = board.boardData.bigBoxs[board.boardData.boxs[index].bigBox][j]     
+            if tonumber(r.number) == tonumber(board.boardData.selected.number) or tonumber(c.number) == tonumber(board.boardData.selected.number) or tonumber(bb.number) == tonumber(board.boardData.selected.number) then
+                shouldDraw = true
+            end
+        end
+        if shouldDraw then
+            gfx.drawLine(sbx,sby,sbx + smallBoxWidth, sby + smallBoxHeight)
+            gfx.drawLine(sbx,sby + smallBoxHeight,sbx + smallBoxWidth, sby)
+        end
+    end
+end
 
 function findBigBoxGivenRowAndColumn(row,column)
     if row < 4 and column < 4 then
