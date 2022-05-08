@@ -3,8 +3,6 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/crank"
-
--- import "smallBoxClass"
 import "boardClass"
 
 local gfx <const> = playdate.graphics
@@ -21,7 +19,6 @@ difficutly = {
     [4] = "expert"
 }
 math.randomseed(playdate.getSecondsSinceEpoch())
--- local simple_template = '.34....7.......36.71.....28..25.7...57.....1...38..5..82..6........7.14.6..1....3'
 
 movespeed = 200
 function saveGameData(board)
@@ -47,18 +44,40 @@ function setUpTitleScreen()
     -- saveGameData(testBoard)
     if playdate.datastore.read("board_table") ~= nil then
       continueButton = setupButton("*Continue*", true, true,screenWidth / 2, screenHeight* (5/10), resumeGame)
-      newGameGameButton = setupButton("*New Game*", true, false, screenWidth / 2, screenHeight* (7/10), startNewGame)
-      optionsButton = setupButton("*options*", true, false, screenWidth / 2, screenHeight* (9/10), startNewGame)
-      titleScreen = {["title"]=titleLabel,["Buttons"]={continueButton,newGameGameButton,optionsButton}, ["selected"]=continueButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
+      newGameGameButton = setupButton("*New Game*", true, false, screenWidth / 2, screenHeight* (7/10), showDifficultyScreen)
+      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (9/10), showDifficultyScreen)
+      titleScreen = {["title"]=titleLabel,["Buttons"]={continueButton,newGameGameButton,settingsButton}, ["selected"]=continueButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
       }}
     else
-      newGameGameButton = setupButton("*New Game*", true, true, screenWidth / 2, screenHeight* (5/10), startNewGame)
-      optionsButton = setupButton("*options*", true, false, screenWidth / 2, screenHeight* (7/10), startNewGame)
-      titleScreen = {["title"]=titleLabel,["Buttons"]={newGameGameButton,optionsButton}, ["selected"]=newGameGameButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
+      newGameGameButton = setupButton("*New Game*", true, true, screenWidth / 2, screenHeight* (5/10), showDifficultyScreen)
+      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (7/10), showDifficultyScreen)
+      titleScreen = {["title"]=titleLabel,["Buttons"]={newGameGameButton,settingsButton}, ["selected"]=newGameGameButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
       }}
     end
         handleButtonsforbuttons(titleScreen)
     return titleScreen
+end
+
+function setUpDifficultyScreen()
+    local screenWidth= playdate.display.getWidth() 
+    local screenHeight = playdate.display.getHeight() 
+    local titleLabel = setupLabel("*Select Difficutly*", true, screenWidth / 2, screenHeight / 8)
+    local easyButton = {}
+    local normalButton = {}
+    local hardButton = {}
+    local veryHardButton = {}
+    local difficutlyScreen = {}
+    -- local testBoard = setUpBoard(1)
+    -- saveGameData(testBoard)
+    easyButton = setupButton("*Easy*", true, true,screenWidth / 2, screenHeight* (3/10), startNewGame)
+    normalButton = setupButton("*Normal*", true, false, screenWidth / 2, screenHeight* (5/10), startNewGame)
+    hardButton = setupButton("*Hard*", true, false, screenWidth / 2, screenHeight* (7/10), startNewGame)
+    veryHardButton = setupButton("*Very Hard*", true, false, screenWidth / 2, screenHeight* (9/10), startNewGame)
+    difficutlyScreen = {["title"]=titleLabel,["Buttons"]={easyButton,normalButton,hardButton, veryHardButton}, ["selected"]=easyButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
+    },["difficulty"]=1}
+    handleButtonsforbuttons(difficutlyScreen)
+    playdate.timer.new(movespeed,setBoolToTrue, "a", difficutlyScreen)
+    return difficutlyScreen
 end
 
 
@@ -108,7 +127,7 @@ end
 function setUpdateForBoard(board)
     function board:update()
         handleButtonsforBoard(board)
-        local temp = playdate.getCrankTicks(10)
+        local temp = playdate.getCrankTicks(4)
         if temp ~= 0 then
             local sign = findSign(temp)
             incrementSelectedWithCarnk("crank",math.floor(sign),board)
@@ -166,7 +185,8 @@ end
 
 function startNewGame(screen)
   gfx.sprite.removeAll()
-  mainBoard = setUpBoard(1)
+  local dif = screen.difficulty ~= nil and screen.difficulty or 1
+  mainBoard = setUpBoard(dif)
   myGameSetUp(mainBoard)
 end
 function resumeGame()
@@ -174,6 +194,9 @@ function resumeGame()
   mainBoard = reSetUpBoard(playdate.datastore.read("board_table"))
   myGameSetUp(mainBoard)
 end
+
+
+
 
 -- local buttonCanBePressed = {
 --     ["up"] = true,
@@ -267,6 +290,7 @@ function cycleThroughButtonsOnScreen(bool,screen,movement)
       screen.selected:markDirty()
       screen.selected.isSelected = false
       screen.selected = screen.Buttons[newSelected]
+      screen.difficulty = newSelected
       screen.selected.isSelected = true
       screen.selected:markDirty()
   end
@@ -286,7 +310,7 @@ function handleButtonsforbuttons(screen)
         if playdate.buttonIsPressed( playdate.kButtonLeft ) then
             
         end
-        if playdate.buttonIsPressed( playdate.kButtonA ) then
+        if playdate.buttonJustPressed( playdate.kButtonA ) then
             screen.selected.clickAction(screen)
         end
         if playdate.buttonIsPressed( playdate.kButtonB ) then
@@ -295,7 +319,6 @@ function handleButtonsforbuttons(screen)
     end
 end
 
-local titleScreen = setUpTitleScreen()
 
 function incrementSelectedWithCarnk(bool,amountToAdd, board)
   if board.boardData.buttonCanBePressed[bool] then
@@ -316,6 +339,13 @@ function incrementSelectedWithCarnk(bool,amountToAdd, board)
       end
   end  
 end
+
+function showDifficultyScreen()
+  gfx.sprite.removeAll()
+  difficutlyScreen = setUpDifficultyScreen()
+end
+
+local titleScreen = setUpTitleScreen()
 
 
 
