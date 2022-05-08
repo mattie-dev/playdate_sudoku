@@ -28,6 +28,7 @@ function saveGameData(board)
   if board ~=nil then
     playdate.datastore.write(board, "board_table", true) 
   end
+  
 end
 function removeGameData()
     playdate.datastore.delete("board_table") 
@@ -123,7 +124,14 @@ function setUpBoard(diff)
 end
 function reSetUpBoard(oldBoard)  
     local mainBoard = gfx.sprite.new()
-    mainBoard.boardData = oldBoard.boardData
+    local template = ""
+    for i=1,81 do
+      template = template .. (oldBoard.boardData.boxs[i].number ~= 0 and oldBoard.boardData.boxs[i].number or ".")
+    end
+    mainBoard.boardData = generateBoard(template)
+    for i=1,81 do
+      mainBoard.boardData.boxs[i].status = oldBoard.boardData.boxs[i].status
+    end
     setDrawForBoardSprite(mainBoard)
     setUpdateForBoard(mainBoard)
     return mainBoard
