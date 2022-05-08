@@ -2,7 +2,7 @@
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
-
+import "CoreLibs/crank"
 
 -- import "smallBoxClass"
 import "boardClass"
@@ -95,9 +95,27 @@ function setupButton(text, isBold, isSelected, x, y, clickAction)
     return button
 end
 
+function findSign(x)
+   if x<0 then
+     return -1
+   elseif x>0 then
+     return 1
+   else
+     return 0
+   end
+end
+
 function setUpdateForBoard(board)
     function board:update()
         handleButtonsforBoard(board)
+        local temp = playdate.getCrankTicks(10)
+        if temp ~= 0 then
+            local sign = findSign(temp)
+            incrementSelectedWithCarnk("crank",math.floor(sign),board)
+          -- for i=sign,temp,sign do
+          --     incrementSelectedWithCarnk("crank",math.floor(sign),board)
+          --   end
+        end
     end
     return board
 end
@@ -279,6 +297,25 @@ end
 
 local titleScreen = setUpTitleScreen()
 
+function incrementSelectedWithCarnk(bool,amountToAdd, board)
+  if board.boardData.buttonCanBePressed[bool] then
+      -- board.boardData.buttonCanBePressed[bool] = false
+      playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
+      if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
+          local newNumber = board.boardData.selected.number + amountToAdd
+          board.boardData.selected.status = status["Guessed"]
+          if newNumber > 9 then
+              newNumber = 9
+          elseif newNumber <= 0 then
+              newNumber = 0
+              board.boardData.selected.status = status["Empty"]
+          end
+          board.boardData.selected.number = newNumber
+          
+          board:markDirty()
+      end
+  end  
+end
 
 
 
@@ -286,7 +323,6 @@ local titleScreen = setUpTitleScreen()
 function playdate.update()
     gfx.sprite.update()
     playdate.timer.updateTimers()
-
 end
 
 function playdate.gameWillTerminate()

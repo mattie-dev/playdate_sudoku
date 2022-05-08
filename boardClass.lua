@@ -49,7 +49,8 @@ function generateBoard(template)
         ["left"] = true,
         ["right"] = true,
         ["a"] = false,
-        ["b"] = true
+        ["b"] = true,
+        ["crank"] = true
     }
     playdate.timer.new(movespeed,setBoolToTrue, "a", board)
     return board
