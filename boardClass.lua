@@ -159,3 +159,27 @@ function findBigBoxGivenRowAndColumn(row,column)
     end
 end
 
+
+function checkIfBoardIsFinishedAndValid(board)
+    local data = board.boardData
+    local rows= data.rows
+    local columns = data.columns
+    local bigBoxs = data.bigBoxs
+    local isValid = true
+    for i=1,9 do
+        local rowNumbers = {}
+        local columnNumbers = {}
+        local bigBoxNumbers = {}
+      for j=1,9 do
+          if rowNumbers[math.floor(rows[i][j].number)] == nil and columnNumbers[math.floor(columns[i][j].number)] == nil and bigBoxNumbers[math.floor(bigBoxs[i][j].number)] == nil and rows[j][i].number ~= 0 then
+             rowNumbers[math.floor(rows[i][j].number)] = true
+             columnNumbers[math.floor(columns[i][j].number)] = true
+             bigBoxNumbers[math.floor(bigBoxs[i][j].number)] = true
+         else
+             isValid = false
+             return isValid
+         end
+      end
+    end
+    return isValid
+end

@@ -354,6 +354,9 @@ function incrementSelected(bool,amountToAdd, board)
           
           board:markDirty()
       end
+      if checkIfBoardIsFinishedAndValid(board) then
+        print("Congradgulations!")
+      end
   end  
 end
 
