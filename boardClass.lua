@@ -60,10 +60,10 @@ end
 
 function setDrawForBoardSprite(boardSprite)
     function boardSprite:draw(x, y, width, height)
+        gfx.setColor(gfx.kColorBlack == gfx.getBackgroundColor() and gfx.kColorWhite or gfx.kColorBlack)
         local thickLineWidth, thinLineWidth = 5, 1
         local smallBoxWidth, smallBoxHeight = width/9, height/9
         gfx.setLineWidth(thickLineWidth)
-        -- gfx.setColor(gfx.kColorBlack)
         gfx.drawRect(0, 0, width, height)
         -- Draw Thick Lines
         gfx.drawLine(0,height/3,width,height/3)
@@ -84,7 +84,7 @@ function setDrawForBoardSprite(boardSprite)
         gfx.drawLine((5*width)/9,0,(5*width)/9,height)
         gfx.drawLine((7*width)/9,0,(7*width)/9,height)
         gfx.drawLine((8*width)/9,0,(8*width)/9,height)
-        gfx.setColor(gfx.kColorBlack)
+        -- gfx.setColor(gfx.kColorBlack)
         local selectedx, selectedy = ((self.boardData.selected.column-1)*smallBoxWidth), ((self.boardData.selected.row-1)*smallBoxHeight)
         playdate.graphics.fillRect(selectedx, selectedy, smallBoxWidth+1, smallBoxHeight+1)
         for index=1, 81 do
@@ -99,10 +99,15 @@ function setDrawForBoardSprite(boardSprite)
                 local textHeight = gfx.getFont():getHeight()
                 gfx.drawText(text,sbx+ (smallBoxWidth/2 - textWidth/2),sby+(smallBoxHeight - textHeight))
             end
-            highlightSameNumber(self, index, thickLineWidth, sbx, sby, smallBoxWidth, smallBoxHeight)
-            indicateSpotsNumberCanNotGo(self, index, sbx, sby, smallBoxWidth, smallBoxHeight)
+            if settings["Highlight same sumber as selected"] then
+                highlightSameNumber(self, index, thickLineWidth, sbx, sby, smallBoxWidth, smallBoxHeight)
+            end
+            if settings["Indicate where number can't go"] then
+                indicateSpotsNumberCanNotGo(self, index, sbx, sby, smallBoxWidth, smallBoxHeight)
+            end
         end
     end
+    gfx.setColor(gfx.kColorXOR)
     return boardSprite
 end
 
@@ -126,7 +131,7 @@ function indicateSpotsNumberCanNotGo(board, index, sbx, sby, smallBoxWidth, smal
             end
         end
         if shouldDraw then
-            gfx.drawLine(sbx,sby,sbx + smallBoxWidth, sby + smallBoxHeight)
+            gfx.drawLine(sbx, sby,sbx + smallBoxWidth, sby + smallBoxHeight)
             gfx.drawLine(sbx,sby + smallBoxHeight,sbx + smallBoxWidth, sby)
         end
     end

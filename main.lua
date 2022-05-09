@@ -8,6 +8,8 @@ import "boardClass"
 local gfx <const> = playdate.graphics
 
 gfx.setImageDrawMode(gfx.kDrawModeNXOR)
+gfx.setBackgroundColor(gfx.kColorWhite)
+gfx.setColor(gfx.kColorXOR)
 gfx.clear()
 
 getmetatable('').__index = function(str,i) return string.sub(str,i,i) end
@@ -21,6 +23,34 @@ difficutly = {
 math.randomseed(playdate.getSecondsSinceEpoch())
 
 movespeed = 200
+settings = {
+  ["Dark Mode"]=false,
+  ["Highlight same sumber as selected"] = false,
+  ["Indicate where number can't go"] = false
+}
+
+function saveSettings()
+  playdate.datastore.write(settings, "settings", true)
+  useSettings()
+end
+function setSettings()
+  if playdate.datastore.read("settings") ~= nil then
+    settings = playdate.datastore.read("settings")
+    useSettings()
+  else
+    saveSettings()
+  end
+end
+function useSettings()
+  if settings["Dark Mode"] then
+    playdate.display.setInverted(true)
+  else
+    playdate.display.setInverted(false)
+  end
+end
+setSettings()
+
+
 function saveGameData(board)
   if board ~=nil then
     playdate.datastore.write(board, "board_table", true) 
@@ -29,6 +59,8 @@ function saveGameData(board)
 end
 function removeGameData()
     playdate.datastore.delete("board_table") 
+end
+function useless()
 end
 -- removeGameData()
 
@@ -45,14 +77,14 @@ function setUpTitleScreen()
     if playdate.datastore.read("board_table") ~= nil then
       continueButton = setupButton("*Continue*", true, true,screenWidth / 2, screenHeight* (5/10), resumeGame)
       newGameGameButton = setupButton("*New Game*", true, false, screenWidth / 2, screenHeight* (7/10), showDifficultyScreen)
-      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (9/10), showDifficultyScreen)
+      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (9/10), showSettingsScreen)
       titleScreen = {["title"]=titleLabel,["Buttons"]={continueButton,newGameGameButton,settingsButton}, ["selected"]=continueButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
-      }}
+      }, ["backAction"] = useless}
     else
       newGameGameButton = setupButton("*New Game*", true, true, screenWidth / 2, screenHeight* (5/10), showDifficultyScreen)
-      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (7/10), showDifficultyScreen)
+      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (7/10), showSettingsScreen)
       titleScreen = {["title"]=titleLabel,["Buttons"]={newGameGameButton,settingsButton}, ["selected"]=newGameGameButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
-      }}
+      }, ["backAction"] = useless}
     end
         handleButtonsforbuttons(titleScreen)
     return titleScreen
@@ -74,12 +106,55 @@ function setUpDifficultyScreen()
     hardButton = setupButton("*Hard*", true, false, screenWidth / 2, screenHeight* (7/10), startNewGame)
     veryHardButton = setupButton("*Very Hard*", true, false, screenWidth / 2, screenHeight* (9/10), startNewGame)
     difficutlyScreen = {["title"]=titleLabel,["Buttons"]={easyButton,normalButton,hardButton, veryHardButton}, ["selected"]=easyButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
-    },["difficulty"]=1}
+    },["difficulty"]=1, ["backAction"] = showTitleScreen}
     handleButtonsforbuttons(difficutlyScreen)
     playdate.timer.new(movespeed,setBoolToTrue, "a", difficutlyScreen)
     return difficutlyScreen
 end
 
+function setUpSettingsScreen()
+    local screenWidth= playdate.display.getWidth() 
+    local screenHeight = playdate.display.getHeight() 
+    local titleLabel = setupLabel("*Select Difficutly*", true, screenWidth / 2, screenHeight / 8)
+    local darkModeButton = {}
+    local similarButton = {}
+    local wrongButton = {}
+    local settingsScreen = {}
+    darkModeButton = setupCheckBoxAndLabel("*Dark Mode*", true, true,screenWidth / 2, screenHeight* (3/10), togglePropertyInSettings, "Dark Mode")
+    similarButton = setupCheckBoxAndLabel("*Highlight Similar*", true, false, screenWidth / 2, screenHeight* (5/10), togglePropertyInSettings,  "Highlight same sumber as selected")
+    wrongButton = setupCheckBoxAndLabel("*Show Blocked Boxs*", true, false, screenWidth / 2, screenHeight* (7/10), togglePropertyInSettings,  "Indicate where number can't go")
+    settingsScreen = {["title"]=titleLabel,["Buttons"]={darkModeButton,similarButton,wrongButton}, ["selected"]=darkModeButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
+    }, ["backAction"] = showTitleScreen}
+    handleButtonsforCheckBoxs(settingsScreen)
+    return settingsScreen
+end
+
+function togglePropertyInSettings(property)
+  settings[property] = not settings[property]
+  saveSettings()
+end
+
+-- function setUpSettingsScreen()
+--     local screenWidth= playdate.display.getWidth() 
+--     local screenHeight = playdate.display.getHeight() 
+--     local titleLabel = setupLabel("*Select Difficutly*", true, screenWidth / 2, screenHeight / 8)
+--     local easyButton = {}
+--     local normalButton = {}
+--     local hardButton = {}
+--     local veryHardButton = {}
+--     local difficutlyScreen = {}
+--     -- local testBoard = setUpBoard(1)
+--     -- saveGameData(testBoard)
+--     easyButton = setupButton("*Easy*", true, true,screenWidth / 2, screenHeight* (3/10), startNewGame)
+--     normalButton = setupButton("*Normal*", true, false, screenWidth / 2, screenHeight* (5/10), startNewGame)
+--     hardButton = setupButton("*Hard*", true, false, screenWidth / 2, screenHeight* (7/10), startNewGame)
+--     veryHardButton = setupButton("*Very Hard*", true, false, screenWidth / 2, screenHeight* (9/10), startNewGame)
+--     difficutlyScreen = {["title"]=titleLabel,["Buttons"]={easyButton,normalButton,hardButton, veryHardButton}, ["selected"]=easyButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
+--     },["difficulty"]=1}
+--     handleButtonsforbuttons(difficutlyScreen)
+--     playdate.timer.new(movespeed,setBoolToTrue, "a", difficutlyScreen)
+--     return difficutlyScreen
+-- end
 
 function setupLabel(text,isBold, x, y)
     local label = gfx.sprite.new()
@@ -109,6 +184,32 @@ function setupButton(text, isBold, isSelected, x, y, clickAction)
             gfx.drawRoundRect(x,y,width,height,6)
         end
         gfx.drawText(text, x+10,y+7)
+    end
+    button.clickAction = clickAction
+    return button
+end
+
+function setupCheckBoxAndLabel(text, isBold, isSelected, x, y, clickAction, property)
+    local button = gfx.sprite.new()
+    local buttonWidth = gfx.getTextSize(text)
+    local buttonHeight = gfx.getFont(isBold and gfx.font.kVariantBold or gfx.font.kVariantNormal):getHeight()
+    button.isSelected = isSelected
+    button.isSet = isSet
+    button.property = property
+    button:add()
+    button:setSize(buttonWidth+30, buttonHeight)
+    button:moveTo(x, y)
+    function button:draw(x, y, width, height)
+        if button.isSelected then
+            gfx.fillRect(x+width-20,y,20,height)
+        else
+            gfx.drawRect(x+width-20,y,20,height)
+        end
+        if settings[button.property] then
+            gfx.drawLine(x+width-20,y,width,height)
+            gfx.drawLine(x+width-20,height,width,y)
+        end
+        gfx.drawText(text, x,y)
     end
     button.clickAction = clickAction
     return button
@@ -313,8 +414,32 @@ function handleButtonsforbuttons(screen)
         if playdate.buttonJustPressed( playdate.kButtonA ) then
             screen.selected.clickAction(screen)
         end
-        if playdate.buttonIsPressed( playdate.kButtonB ) then
+        if playdate.buttonJustPressed( playdate.kButtonB ) then
+            screen.backAction()
+        end
+    end
+end
+
+function handleButtonsforCheckBoxs(screen)
+    function screen.title:update()
+        if playdate.buttonIsPressed( playdate.kButtonUp ) then
+          cycleThroughButtonsOnScreen("up",screen, -1)
+        end
+        if playdate.buttonIsPressed( playdate.kButtonRight ) then
             
+        end
+        if playdate.buttonIsPressed( playdate.kButtonDown ) then
+            cycleThroughButtonsOnScreen("down",screen, 1)
+        end
+        if playdate.buttonIsPressed( playdate.kButtonLeft ) then
+            
+        end
+        if playdate.buttonJustPressed( playdate.kButtonA ) then
+            screen.selected.clickAction(screen.selected.property)
+            screen.selected:markDirty()
+        end
+        if playdate.buttonJustPressed( playdate.kButtonB ) then
+            screen.backAction()
         end
     end
 end
@@ -343,6 +468,14 @@ end
 function showDifficultyScreen()
   gfx.sprite.removeAll()
   difficutlyScreen = setUpDifficultyScreen()
+end
+function showSettingsScreen()
+  gfx.sprite.removeAll()
+  settingsScreen = setUpSettingsScreen()
+end
+function showTitleScreen()
+  gfx.sprite.removeAll()
+  titlScreenScreen = setUpTitleScreen()
 end
 
 local titleScreen = setUpTitleScreen()
