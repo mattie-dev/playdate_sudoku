@@ -6,13 +6,15 @@ import "CoreLibs/crank"
 import "boardClass"
 
 local gfx <const> = playdate.graphics
+local menu = playdate.getSystemMenu()
+
 
 gfx.setImageDrawMode(gfx.kDrawModeNXOR)
 gfx.setBackgroundColor(gfx.kColorWhite)
 gfx.setColor(gfx.kColorXOR)
 gfx.clear()
 
-getmetatable('').__index = function(str,i) return string.sub(str,i,i) end
+-- getmetatable('').__index = function(str,i) return string.sub(str,i,i) end
 
 difficutly = {
     [1] = "simple",
@@ -26,9 +28,9 @@ movespeed = 200
 settings = {
   ["Dark Mode"]=false,
   ["Highlight same sumber as selected"] = false,
-  ["Indicate where number can't go"] = false
+  ["Indicate where number can't go"] = false,
+  ["Show Instructions"]=false
 }
-
 function saveSettings()
   playdate.datastore.write(settings, "settings", true)
   useSettings()
@@ -48,7 +50,9 @@ function useSettings()
     playdate.display.setInverted(false)
   end
 end
+
 setSettings()
+
 
 
 function saveGameData(board)
@@ -64,7 +68,10 @@ function useless()
 end
 -- removeGameData()
 
+
 function setUpTitleScreen()
+    menu:removeAllMenuItems()
+    gfx.sprite.removeAll()
     local screenWidth= playdate.display.getWidth() 
     local screenHeight = playdate.display.getHeight() 
     local titleLabel = setupLabel("*Sudoku*", true, screenWidth / 2, screenHeight / 4)
@@ -119,11 +126,13 @@ function setUpSettingsScreen()
     local darkModeButton = {}
     local similarButton = {}
     local wrongButton = {}
+    local instructionButton = {}
     local settingsScreen = {}
     darkModeButton = setupCheckBoxAndLabel("*Dark Mode*", true, true,screenWidth / 2, screenHeight* (3/10), togglePropertyInSettings, "Dark Mode")
     similarButton = setupCheckBoxAndLabel("*Highlight Similar*", true, false, screenWidth / 2, screenHeight* (5/10), togglePropertyInSettings,  "Highlight same sumber as selected")
     wrongButton = setupCheckBoxAndLabel("*Show Blocked Boxs*", true, false, screenWidth / 2, screenHeight* (7/10), togglePropertyInSettings,  "Indicate where number can't go")
-    settingsScreen = {["title"]=titleLabel,["Buttons"]={darkModeButton,similarButton,wrongButton}, ["selected"]=darkModeButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
+    instructionButton = setupCheckBoxAndLabel("*Show Instructions*", true, false, screenWidth / 2, screenHeight* (9/10), togglePropertyInSettings,  "Show Instructions")
+    settingsScreen = {["title"]=titleLabel,["Buttons"]={darkModeButton,similarButton,wrongButton, instructionButton}, ["selected"]=darkModeButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
     }, ["backAction"] = showTitleScreen}
     handleButtonsforCheckBoxs(settingsScreen)
     return settingsScreen
@@ -134,27 +143,6 @@ function togglePropertyInSettings(property)
   saveSettings()
 end
 
--- function setUpSettingsScreen()
---     local screenWidth= playdate.display.getWidth() 
---     local screenHeight = playdate.display.getHeight() 
---     local titleLabel = setupLabel("*Select Difficutly*", true, screenWidth / 2, screenHeight / 8)
---     local easyButton = {}
---     local normalButton = {}
---     local hardButton = {}
---     local veryHardButton = {}
---     local difficutlyScreen = {}
---     -- local testBoard = setUpBoard(1)
---     -- saveGameData(testBoard)
---     easyButton = setupButton("*Easy*", true, true,screenWidth / 2, screenHeight* (3/10), startNewGame)
---     normalButton = setupButton("*Normal*", true, false, screenWidth / 2, screenHeight* (5/10), startNewGame)
---     hardButton = setupButton("*Hard*", true, false, screenWidth / 2, screenHeight* (7/10), startNewGame)
---     veryHardButton = setupButton("*Very Hard*", true, false, screenWidth / 2, screenHeight* (9/10), startNewGame)
---     difficutlyScreen = {["title"]=titleLabel,["Buttons"]={easyButton,normalButton,hardButton, veryHardButton}, ["selected"]=easyButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
---     },["difficulty"]=1}
---     handleButtonsforbuttons(difficutlyScreen)
---     playdate.timer.new(movespeed,setBoolToTrue, "a", difficutlyScreen)
---     return difficutlyScreen
--- end
 
 function setupLabel(text,isBold, x, y)
     local label = gfx.sprite.new()
@@ -256,6 +244,9 @@ function setUpBoard(diff)
     
     local mainBoard = gfx.sprite.new()
     mainBoard.boardData = generateBoard(simple_template)
+    for index=1, 81 do
+      print(mainBoard.boardData.boxs[index].number.."hi")
+    end
     setDrawForBoardSprite(mainBoard)
     setUpdateForBoard(mainBoard)
     return mainBoard
@@ -274,12 +265,39 @@ function reSetUpBoard(oldBoard)
     setUpdateForBoard(mainBoard)
     return mainBoard
 end
+
+function showBoardInstrucitons()
+  local leftSide = gfx.sprite.new()
+  leftSide:add()
+  leftSide:setSize(100,465)
+  leftSide:moveTo(30,0)
+  local rightSide = gfx.sprite.new()
+  rightSide:add()
+  rightSide:setSize(100,465)
+  rightSide:moveTo(playdate.display.getWidth()-30,0)
+  function leftSide:draw(x, y, width, height)
+    -- gfx.drawRect(x,y,width,height)
+    gfx.drawTextAligned("*How To\nPlay*\n\n*D-Pad*:\nMove\n\n*A/Crank*:\nIncrease\n\n*B/Crank*:\nDecrease", x + width/2, y+ 10, kTextAlignment.center)
+  end
+  function rightSide:draw(x, y, width, height)
+    -- gfx.drawRect(x,y,width,height)
+    gfx.drawTextAligned("*How To\nPlay*\n\n*Menu*:\nGo Home\n\nReturns\nHome\nWhen\nComplete", x + width/2, y+ 10, kTextAlignment.center)
+  end
+end
+
+
 function myGameSetUp(board)
     local midpointx, midpointy = playdate.display.getWidth() / 2, playdate.display.getHeight() / 2
     local boardSize = playdate.display.getHeight() *.95
     board:add()
     board:setSize(boardSize,boardSize)
     board:moveTo(midpointx,midpointy)
+    local menuItem, error = menu:addMenuItem("Sudoku Home", function()
+        titleScreen = setUpTitleScreen()
+    end)
+    if settings["Show Instructions"] then
+      showBoardInstrucitons()
+    end
 end
 
 
@@ -356,6 +374,7 @@ function incrementSelected(bool,amountToAdd, board)
       end
       if checkIfBoardIsFinishedAndValid(board) then
         print("Congradgulations!")
+        playdate.timer.new(5000,setUpTitleScreen)
       end
   end  
 end
@@ -466,6 +485,10 @@ function incrementSelectedWithCarnk(bool,amountToAdd, board)
           board:markDirty()
       end
   end  
+  if checkIfBoardIsFinishedAndValid(board) then
+    print("Congradgulations!")
+    playdate.timer.new(5000,setUpTitleScreen)
+  end
 end
 
 function showDifficultyScreen()

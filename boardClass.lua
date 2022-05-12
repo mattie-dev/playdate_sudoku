@@ -22,15 +22,17 @@ function generateBoard(template)
     board.rows = {{}, {}, {}, {}, {}, {}, {}, {}, {}}
     board.columns = {{}, {}, {}, {}, {}, {}, {}, {}, {}}
     board.bigBoxs = {{}, {}, {}, {}, {}, {}, {}, {}, {}}
+    local numbers = {}
+    template:gsub(".",function(c) table.insert(numbers,c) end)
+    printTable(test)
     for r=1, 9 do
         for c=1, 9 do
             n = (c) + ((r-1) * 9)
-            -- local b = smallBox(r,c,template[n] ~= '.' and tonumber(template[n]) or 0, self)
             local b = {
                 ["row"]=r,
                 ["column"]=c,
-                ["number"]=template[n] ~= "." and template[n] or 0,
-                ["status"]=template[n] ~= "." and status["Given"] or status["Empty"],
+                ["number"]=numbers[n] ~= "." and numbers[n] or 0,
+                ["status"]=numbers[n] ~= "." and status["Given"] or status["Empty"],
                 ["bigBox"]=findBigBoxGivenRowAndColumn(r,c)
             }
             if board.number == 0 then
@@ -90,6 +92,7 @@ function setDrawForBoardSprite(boardSprite)
         for index=1, 81 do
             local sbx, sby = ((self.boardData.boxs[index].column-1)*smallBoxWidth), ((self.boardData.boxs[index].row-1)*smallBoxHeight)
             local text = self.boardData.boxs[index].number ~= 0 and self.boardData.boxs[index].number or ''
+            -- print(self.boardData.boxs[index].number.."hi")
             if self.boardData.boxs[index].status == status["Given"] then
                 local textWidth = gfx.getTextSize("*"..text)
                 local textHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()

@@ -4,3 +4,5 @@
 *.py
 *.csv
 .DS_Store
+.gitignore
+*.afphoto
