@@ -245,7 +245,6 @@ function setUpBoard(diff)
     local mainBoard = gfx.sprite.new()
     mainBoard.boardData = generateBoard(simple_template)
     for index=1, 81 do
-      print(mainBoard.boardData.boxs[index].number.."hi")
     end
     setDrawForBoardSprite(mainBoard)
     setUpdateForBoard(mainBoard)
@@ -363,17 +362,20 @@ function incrementSelected(bool,amountToAdd, board)
           local newNumber = board.boardData.selected.number + amountToAdd
           board.boardData.selected.status = status["Guessed"]
           if newNumber > 9 then
-              newNumber = 9
-          elseif newNumber <= 0 then
-              newNumber = 0
-              board.boardData.selected.status = status["Empty"]
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber == 0 then
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber < 0 then
+            newNumber = 9
           end
           board.boardData.selected.number = newNumber
           
           board:markDirty()
       end
       if checkIfBoardIsFinishedAndValid(board) then
-        print("Congradgulations!")
+        -- print("Congradgulations!")
         playdate.timer.new(5000,setUpTitleScreen)
       end
   end  
@@ -475,10 +477,13 @@ function incrementSelectedWithCarnk(bool,amountToAdd, board)
           local newNumber = board.boardData.selected.number + amountToAdd
           board.boardData.selected.status = status["Guessed"]
           if newNumber > 9 then
-              newNumber = 9
-          elseif newNumber <= 0 then
-              newNumber = 0
-              board.boardData.selected.status = status["Empty"]
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber == 0 then
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber < 0 then
+            newNumber = 9
           end
           board.boardData.selected.number = newNumber
           
@@ -486,7 +491,7 @@ function incrementSelectedWithCarnk(bool,amountToAdd, board)
       end
   end  
   if checkIfBoardIsFinishedAndValid(board) then
-    print("Congradgulations!")
+    -- print("Congradgulations!")
     playdate.timer.new(5000,setUpTitleScreen)
   end
 end
