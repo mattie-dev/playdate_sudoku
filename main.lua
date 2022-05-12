@@ -294,6 +294,15 @@ function myGameSetUp(board)
     local menuItem, error = menu:addMenuItem("Sudoku Home", function()
         titleScreen = setUpTitleScreen()
     end)
+    local checkmarkMenuItem, error = menu:addCheckmarkMenuItem("Instructions", settings["Show Instructions"], function(value)
+        settings["Show Instructions"] = value
+        if settings["Show Instructions"] then
+          showBoardInstrucitons()
+        elseif gfx.sprite.spriteCount() == 3 then
+          local spriteArray = {playdate.graphics.sprite.getAllSprites()[2],playdate.graphics.sprite.getAllSprites()[3]}
+          gfx.sprite.removeSprites(spriteArray)
+        end
+    end)
     if settings["Show Instructions"] then
       showBoardInstrucitons()
     end
