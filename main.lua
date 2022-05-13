@@ -375,8 +375,12 @@ function finshedBoard(board)
   local labelHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()
   congradulatioinsLabel:setSize(labelWidth*1.1,labelHeight*4.1)
   congradulatioinsLabel:moveTo((labelWidth/2) *1.2, screenHeight/2)
-  board:moveBy(labelWidth/2,0)
   congradulatioinsLabel.countDown = 11
+  board:moveBy(labelWidth/2,0)
+  board.boardData.selected = nil
+  function board:update()
+    
+  end
   function congradulatioinsLabel:draw(x, y, width, height)
     gfx.fillRect(x,y,width,height)
     -- gfx.drawText(text,x+labelWidth*0.05,y+labelHeight*0.05)

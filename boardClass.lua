@@ -86,8 +86,10 @@ function setDrawForBoardSprite(boardSprite)
         gfx.drawLine((7*width)/9,0,(7*width)/9,height)
         gfx.drawLine((8*width)/9,0,(8*width)/9,height)
         -- gfx.setColor(gfx.kColorBlack)
-        local selectedx, selectedy = ((self.boardData.selected.column-1)*smallBoxWidth), ((self.boardData.selected.row-1)*smallBoxHeight)
-        playdate.graphics.fillRect(selectedx, selectedy, smallBoxWidth+1, smallBoxHeight+1)
+        if self.boardData.selected ~= nil then
+            local selectedx, selectedy = ((self.boardData.selected.column-1)*smallBoxWidth), ((self.boardData.selected.row-1)*smallBoxHeight)
+            playdate.graphics.fillRect(selectedx, selectedy, smallBoxWidth+1, smallBoxHeight+1)
+        end
         for index=1, 81 do
             local sbx, sby = ((self.boardData.boxs[index].column-1)*smallBoxWidth), ((self.boardData.boxs[index].row-1)*smallBoxHeight)
             local text = self.boardData.boxs[index].number ~= 0 and self.boardData.boxs[index].number or ''
@@ -100,10 +102,10 @@ function setDrawForBoardSprite(boardSprite)
                 local textHeight = gfx.getFont():getHeight()
                 gfx.drawText(text,sbx+ (smallBoxWidth/2 - textWidth/2),sby+(smallBoxHeight - textHeight))
             end
-            if settings["Highlight same sumber as selected"] then
+            if settings["Highlight same sumber as selected"] and self.boardData.selected ~= nil then
                 highlightSameNumber(self, index, thickLineWidth, sbx, sby, smallBoxWidth, smallBoxHeight)
             end
-            if settings["Indicate where number can't go"] then
+            if settings["Indicate where number can't go"] and self.boardData.selected ~= nil then
                 indicateSpotsNumberCanNotGo(self, index, sbx, sby, smallBoxWidth, smallBoxHeight)
             end
         end
