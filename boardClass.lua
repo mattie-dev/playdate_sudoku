@@ -16,7 +16,7 @@ status = {
 
 
 
-function generateBoard(template)
+function generateBoard(template,timeSpent)
     local board = {}
     board.boxs = {}
     board.rows = {{}, {}, {}, {}, {}, {}, {}, {}, {}}
@@ -53,6 +53,7 @@ function generateBoard(template)
         ["b"] = true,
         ["crank"] = true
     }
+    board.timeInSeconds = timeSpent or 0
     board.completed = false
     playdate.timer.new(movespeed,setBoolToTrue, "a", board)
     return board

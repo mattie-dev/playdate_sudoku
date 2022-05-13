@@ -220,9 +220,6 @@ function setUpdateForBoard(board)
         if temp ~= 0 then
             local sign = findSign(temp)
             incrementSelectedWithCarnk("crank",math.floor(sign),board)
-          -- for i=sign,temp,sign do
-          --     incrementSelectedWithCarnk("crank",math.floor(sign),board)
-          --   end
         end
     end
     return board
@@ -256,7 +253,7 @@ function reSetUpBoard(oldBoard)
     for i=1,81 do
       template = template .. (oldBoard.boardData.boxs[i].number ~= 0 and oldBoard.boardData.boxs[i].number or ".")
     end
-    mainBoard.boardData = generateBoard(template)
+    mainBoard.boardData = generateBoard(template,oldBoard.boardData.timeInSeconds)
     for i=1,81 do
       mainBoard.boardData.boxs[i].status = oldBoard.boardData.boxs[i].status
     end
@@ -272,7 +269,7 @@ function showBoardInstrucitons()
   leftSide:moveTo(30,0)
   local rightSide = gfx.sprite.new()
   rightSide:add()
-  rightSide:setSize(100,465)
+  rightSide:setSize(100,415)
   rightSide:moveTo(playdate.display.getWidth()-30,0)
   function leftSide:draw(x, y, width, height)
     -- gfx.drawRect(x,y,width,height)
@@ -291,7 +288,25 @@ function myGameSetUp(board)
     board:add()
     board:setSize(boardSize,boardSize)
     board:moveTo(midpointx,midpointy)
+    timerLabel = gfx.sprite.new()
+    timerLabel:add()
+    timerLabel:setSize(70, 18)
+    timerLabel:moveTo(playdate.display.getWidth()-40,225)
+    -- board.boardData.timeInSeconds = 0
+    function board:OncePerSecond()
+        board.boardData.timeInSeconds = board.boardData.timeInSeconds + 1
+        boardTimer = playdate.timer.new(1000,board.OncePerSecond)
+        timerLabel:markDirty()
+    end
+    boardTimer = playdate.timer.new(1000,board.OncePerSecond)
+    function timerLabel:draw(x, y, width, height)
+      -- gfx.drawRect(x,y,width,height)
+      local minute = board.boardData.timeInSeconds//60 > 9 and tostring(board.boardData.timeInSeconds//60) or "0"..tostring(board.boardData.timeInSeconds//60)
+      local second = board.boardData.timeInSeconds%60 > 9 and tostring(board.boardData.timeInSeconds%60) or "0"..tostring(board.boardData.timeInSeconds%60)
+      gfx.drawTextAligned(minute..":"..second, x + width/2, y + 1, kTextAlignment.center)
+    end
     local menuItem, error = menu:addMenuItem("Sudoku Home", function()
+      boardTimer:remove()
         titleScreen = setUpTitleScreen()
         saveGameData(board)
     end)
@@ -302,9 +317,10 @@ function myGameSetUp(board)
           saveSettings()
           if settings["Show Instructions"] and not board.completed then
             showBoardInstrucitons()
-          elseif gfx.sprite.spriteCount() == 3 then
-            local spriteArray = {playdate.graphics.sprite.getAllSprites()[2],playdate.graphics.sprite.getAllSprites()[3]}
-            gfx.sprite.removeSprites(spriteArray)
+          else
+            gfx.sprite:removeAll()
+            board:add()
+            timerLabel:add()
           end
         end
     end)
@@ -371,10 +387,10 @@ end
 function finshedBoard(board)
   saveGameData(board)
   board.completed = true
-  if gfx.sprite.spriteCount() == 3 then
-    local spriteArray = {playdate.graphics.sprite.getAllSprites()[2],playdate.graphics.sprite.getAllSprites()[3]}
-    gfx.sprite.removeSprites(spriteArray)
-  end
+  gfx.sprite:removeAll()
+  board:add()
+  timerLabel:add()
+  boardTimer:remove()
   local screenWidth= playdate.display.getWidth() 
   local screenHeight = playdate.display.getHeight() 
   local congradulatioinsLabel = gfx.sprite.new()
@@ -382,6 +398,7 @@ function finshedBoard(board)
   local text = "*Congradulations*"
   local labelWidth = gfx.getTextSize(text)
   local labelHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()
+  timerLabel:moveTo((labelWidth/2) *1.2,200)
   congradulatioinsLabel:setSize(labelWidth*1.1,labelHeight*4.1)
   congradulatioinsLabel:moveTo((labelWidth/2) *1.2, screenHeight/2)
   congradulatioinsLabel.countDown = 11
