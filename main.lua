@@ -348,15 +348,15 @@ function moveSelected(bool,rowMove, columnMove,board)
         playdate.timer.new(movespeed,setBoolToTrue, bool, board.boardData)
         local newRow = board.boardData.selected.row + rowMove
         if newRow <1 then
-            newRow = 1
-        elseif newRow > 9 then
             newRow = 9
+        elseif newRow > 9 then
+            newRow = 1
         end
         local newColumn = board.boardData.selected.column + columnMove
         if newColumn <1 then
-            newColumn = 1
-        elseif newColumn > 9 then
             newColumn = 9
+        elseif newColumn > 9 then
+            newColumn = 1
         end
         board.boardData.selected = board.boardData.rows[newRow][newColumn]
         board:markDirty()
