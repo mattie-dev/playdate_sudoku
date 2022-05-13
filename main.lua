@@ -296,12 +296,16 @@ function myGameSetUp(board)
         saveGameData(board)
     end)
     local checkmarkMenuItem, error = menu:addCheckmarkMenuItem("Instructions", settings["Show Instructions"], function(value)
-        settings["Show Instructions"] = value
-        if settings["Show Instructions"] and not board.completed then
-          showBoardInstrucitons()
-        elseif gfx.sprite.spriteCount() == 3 then
-          local spriteArray = {playdate.graphics.sprite.getAllSprites()[2],playdate.graphics.sprite.getAllSprites()[3]}
-          gfx.sprite.removeSprites(spriteArray)
+        local temp = settings["Show Instructions"]
+        if temp ~= value then
+          settings["Show Instructions"] = value
+          saveSettings()
+          if settings["Show Instructions"] and not board.completed then
+            showBoardInstrucitons()
+          elseif gfx.sprite.spriteCount() == 3 then
+            local spriteArray = {playdate.graphics.sprite.getAllSprites()[2],playdate.graphics.sprite.getAllSprites()[3]}
+            gfx.sprite.removeSprites(spriteArray)
+          end
         end
     end)
     if settings["Show Instructions"] and not board.completed then
