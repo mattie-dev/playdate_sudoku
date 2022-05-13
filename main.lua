@@ -279,7 +279,7 @@ function showBoardInstrucitons()
   end
   function rightSide:draw(x, y, width, height)
     -- gfx.drawRect(x,y,width,height)
-    gfx.drawTextAligned("*How To\nPlay*\n\n*Menu*:\nGo Home\n\nReturns\nHome\nWhen\nComplete", x + width/2, y+ 10, kTextAlignment.center)
+    gfx.drawTextAligned("*Menu*:\nGo Home\nON/OFF\nGuide\n\nGame\nDetects\nWhen\nComplete", x + width/2, y+ 10, kTextAlignment.center)
   end
 end
 
