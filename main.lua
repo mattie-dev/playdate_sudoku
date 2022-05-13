@@ -293,6 +293,7 @@ function myGameSetUp(board)
     board:moveTo(midpointx,midpointy)
     local menuItem, error = menu:addMenuItem("Sudoku Home", function()
         titleScreen = setUpTitleScreen()
+        saveGameData(board)
     end)
     local checkmarkMenuItem, error = menu:addCheckmarkMenuItem("Instructions", settings["Show Instructions"], function(value)
         settings["Show Instructions"] = value
@@ -363,6 +364,39 @@ function moveSelected(bool,rowMove, columnMove,board)
     end
 end
 
+function finshedBoard(board)
+  saveGameData(board)
+  local screenWidth= playdate.display.getWidth() 
+  local screenHeight = playdate.display.getHeight() 
+  local congradulatioinsLabel = gfx.sprite.new()
+  congradulatioinsLabel:add()
+  local text = "*Congradulations*"
+  local labelWidth = gfx.getTextSize(text)
+  local labelHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()
+  congradulatioinsLabel:setSize(labelWidth*1.1,labelHeight*4.1)
+  congradulatioinsLabel:moveTo((labelWidth/2) *1.2, screenHeight/2)
+  board:moveBy(labelWidth/2,0)
+  congradulatioinsLabel.countDown = 11
+  function congradulatioinsLabel:draw(x, y, width, height)
+    gfx.fillRect(x,y,width,height)
+    -- gfx.drawText(text,x+labelWidth*0.05,y+labelHeight*0.05)
+    gfx.drawTextAligned("*Congradulations*", x+(labelWidth/2)+(labelWidth*0.05),y+(labelHeight/2)+(labelHeight*0.05), kTextAlignment.center)
+    gfx.drawTextAligned("Return Home In:", x+(labelWidth/2)+(labelWidth*0.05),y+(labelHeight/2)+(labelHeight*1.1), kTextAlignment.center)
+    gfx.drawTextAligned(self.countDown, x+(labelWidth/2)+(labelWidth*0.05),y+(labelHeight/2)+(labelHeight*2.05), kTextAlignment.center)
+  end
+  function congradulatioinsLabel:updateCountDown()
+    if congradulatioinsLabel.countDown >1 then
+      congradulatioinsLabel.countDown = congradulatioinsLabel.countDown-1
+      congradulatioinsLabel:markDirty()
+      playdate.timer.new(1000,congradulatioinsLabel.updateCountDown)
+    else
+      setUpTitleScreen()
+    end
+  end
+  congradulatioinsLabel.updateCountDown()
+  -- playdate.timer.new(11000,setUpTitleScreen)
+end
+
 function incrementSelected(bool,amountToAdd, board)
   if board.boardData.buttonCanBePressed[bool] then
       board.boardData.buttonCanBePressed[bool] = false
@@ -384,8 +418,7 @@ function incrementSelected(bool,amountToAdd, board)
           board:markDirty()
       end
       if checkIfBoardIsFinishedAndValid(board) then
-        -- print("Congradgulations!")
-        playdate.timer.new(5000,setUpTitleScreen)
+        finshedBoard(board)
       end
   end  
 end
@@ -500,8 +533,7 @@ function incrementSelectedWithCarnk(bool,amountToAdd, board)
       end
   end  
   if checkIfBoardIsFinishedAndValid(board) then
-    -- print("Congradgulations!")
-    playdate.timer.new(5000,setUpTitleScreen)
+    finshedBoard(board)
   end
 end
 
