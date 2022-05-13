@@ -136,8 +136,16 @@ function indicateSpotsNumberCanNotGo(board, index, sbx, sby, smallBoxWidth, smal
             end
         end
         if shouldDraw then
-            gfx.drawLine(sbx, sby,sbx + smallBoxWidth, sby + smallBoxHeight)
-            gfx.drawLine(sbx,sby + smallBoxHeight,sbx + smallBoxWidth, sby)
+            -- gfx.drawLine(sbx, sby,sbx + smallBoxWidth, sby + smallBoxHeight)
+            -- gfx.drawLine(sbx,sby + smallBoxHeight,sbx + smallBoxWidth, sby)
+            for r=1,smallBoxWidth do
+                for c=1, smallBoxHeight do
+                    if (r%2 == 0 and c%2 == 1) or (r%2 == 1 and c%2 == 0) then
+                    gfx.drawPixel(sbx+c,sby+r)                        
+                    end
+                end
+            end
+            
         end
     end
 end
