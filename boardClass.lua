@@ -53,6 +53,7 @@ function generateBoard(template)
         ["b"] = true,
         ["crank"] = true
     }
+    board.completed = false
     playdate.timer.new(movespeed,setBoolToTrue, "a", board)
     return board
 end

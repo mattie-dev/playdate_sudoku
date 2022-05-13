@@ -297,14 +297,14 @@ function myGameSetUp(board)
     end)
     local checkmarkMenuItem, error = menu:addCheckmarkMenuItem("Instructions", settings["Show Instructions"], function(value)
         settings["Show Instructions"] = value
-        if settings["Show Instructions"] then
+        if settings["Show Instructions"] and not board.completed then
           showBoardInstrucitons()
         elseif gfx.sprite.spriteCount() == 3 then
           local spriteArray = {playdate.graphics.sprite.getAllSprites()[2],playdate.graphics.sprite.getAllSprites()[3]}
           gfx.sprite.removeSprites(spriteArray)
         end
     end)
-    if settings["Show Instructions"] then
+    if settings["Show Instructions"] and not board.completed then
       showBoardInstrucitons()
     end
 end
@@ -366,6 +366,11 @@ end
 
 function finshedBoard(board)
   saveGameData(board)
+  board.completed = true
+  if gfx.sprite.spriteCount() == 3 then
+    local spriteArray = {playdate.graphics.sprite.getAllSprites()[2],playdate.graphics.sprite.getAllSprites()[3]}
+    gfx.sprite.removeSprites(spriteArray)
+  end
   local screenWidth= playdate.display.getWidth() 
   local screenHeight = playdate.display.getHeight() 
   local congradulatioinsLabel = gfx.sprite.new()
