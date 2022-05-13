@@ -193,11 +193,13 @@ function setupCheckBoxAndLabel(text, isBold, isSelected, x, y, clickAction, prop
         else
             gfx.drawRect(x+width-20,y,20,height)
         end
+      gfx.setColor(gfx.kColorXOR)
         if settings[button.property] then
             gfx.drawLine(x+width-20,y,width,height)
             gfx.drawLine(x+width-20,height,width,y)
         end
         gfx.drawText(text, x,y)
+        gfx.setColor(gfx.kColorXOR)
     end
     button.clickAction = clickAction
     return button
