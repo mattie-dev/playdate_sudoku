@@ -122,7 +122,7 @@ end
 function setUpSettingsScreen()
     local screenWidth= playdate.display.getWidth() 
     local screenHeight = playdate.display.getHeight() 
-    local titleLabel = setupLabel("*Select Difficutly*", true, screenWidth / 2, screenHeight / 8)
+    local titleLabel = setupLabel("*Settings*", true, screenWidth / 2, screenHeight / 8)
     local darkModeButton = {}
     local similarButton = {}
     local wrongButton = {}
