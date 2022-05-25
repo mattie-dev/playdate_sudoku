@@ -11,11 +11,6 @@ status = {
     ["Guessed"] = 3
 }
 
-
-
-
-
-
 function generateBoard(template,timeSpent)
     local board = {}
     board.boxs = {}
@@ -31,7 +26,17 @@ function generateBoard(template,timeSpent)
                 ["row"]=r,
                 ["column"]=c,
                 ["number"]=numbers[n] ~= "." and numbers[n] or 0,
-                ["possible"]={},
+                ["possible"]={
+                    [1] = false,
+                    [2] = false,
+                    [3] = false,
+                    [4] = false,
+                    [5] = false,
+                    [6] = false,
+                    [7] = false,
+                    [8] = false,
+                    [9] = false
+                },
                 ["status"]=numbers[n] ~= "." and status["Given"] or status["Empty"],
                 ["bigBox"]=findBigBoxGivenRowAndColumn(r,c)
             }
@@ -197,3 +202,162 @@ function checkIfBoardIsFinishedAndValid(board)
     end
     return isValid
 end
+
+function findSign(x)
+   if x<0 then
+     return -1
+   elseif x>0 then
+     return 1
+   else
+     return 0
+   end
+end
+
+function setUpdateForBoard(board)
+    function board:update()
+        handleButtonsforBoard(board)
+        local temp = playdate.getCrankTicks(4)
+        if temp ~= 0 then
+            local sign = findSign(temp)
+            incrementSelectedWithCarnk("crank",math.floor(sign),board)
+        end
+    end
+    return board
+end
+
+function setUpBoard(diff)
+    local file_number = math.random(1,10)
+    local random_difficutly = math.random(1,4)
+    local file_name = "puzzles/"..difficutly[diff]..file_number..".json"
+    -- print(file_name)
+    local simple_file = playdate.file.open(file_name)
+    local simple_json = json.decodeFile(simple_file)
+    local puzzle_index = math.random(1,10000)
+    simple_template = simple_json[""..puzzle_index..""]
+    puzzleCount = nil
+    simple_file = nil
+    simple_json = nil
+    
+    local mainBoard = gfx.sprite.new()
+    mainBoard.boardData = generateBoard(simple_template)
+    for index=1, 81 do
+    end
+    setDrawForBoardSprite(mainBoard)
+    setUpdateForBoard(mainBoard)
+    return mainBoard
+end
+
+function reSetUpBoard(oldBoard)  
+    local mainBoard = gfx.sprite.new()
+    local template = ""
+    for i=1,81 do
+      template = template .. (oldBoard.boardData.boxs[i].number ~= 0 and oldBoard.boardData.boxs[i].number or ".")
+    end
+    mainBoard.boardData = generateBoard(template,oldBoard.boardData.timeInSeconds)
+    for i=1,81 do
+      mainBoard.boardData.boxs[i].status = oldBoard.boardData.boxs[i].status
+    end
+    setDrawForBoardSprite(mainBoard)
+    setUpdateForBoard(mainBoard)
+    return mainBoard
+end
+
+function moveSelected(bool,rowMove, columnMove,board)
+    if board.boardData.buttonCanBePressed[bool] then
+        board.boardData.buttonCanBePressed[bool] = false
+        playdate.timer.new(movespeed,setBoolToTrue, bool, board.boardData)
+        local newRow = board.boardData.selected.row + rowMove
+        if newRow <1 then
+            newRow = 9
+        elseif newRow > 9 then
+            newRow = 1
+        end
+        local newColumn = board.boardData.selected.column + columnMove
+        if newColumn <1 then
+            newColumn = 9
+        elseif newColumn > 9 then
+            newColumn = 1
+        end
+        board.boardData.selected = board.boardData.rows[newRow][newColumn]
+        board:markDirty()
+    end
+end
+
+function incrementSelected(bool,amountToAdd, board)
+  if board.boardData.buttonCanBePressed[bool] then
+      board.boardData.buttonCanBePressed[bool] = false
+      playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
+      if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
+          local newNumber = board.boardData.selected.number + amountToAdd
+          board.boardData.selected.status = status["Guessed"]
+          if newNumber > 9 then
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber == 0 then
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber < 0 then
+            newNumber = 9
+          end
+          board.boardData.selected.number = newNumber
+          
+          board:markDirty()
+      end
+      if checkIfBoardIsFinishedAndValid(board) then
+        finshedBoard(board)
+      end
+  end  
+end
+function incrementSelectedWithCarnk(bool,amountToAdd, board)
+  if board.boardData.buttonCanBePressed[bool] then
+      -- board.boardData.buttonCanBePressed[bool] = false
+      playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
+      if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
+          local newNumber = board.boardData.selected.number + amountToAdd
+          board.boardData.selected.status = status["Guessed"]
+          if newNumber > 9 then
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber == 0 then
+            newNumber = 0
+            board.boardData.selected.status = status["Empty"]
+          elseif newNumber < 0 then
+            newNumber = 9
+          end
+          board.boardData.selected.number = newNumber
+          
+          board:markDirty()
+      end
+  end  
+  if checkIfBoardIsFinishedAndValid(board) then
+    finshedBoard(board)
+  end
+end
+
+function handleButtonsforBoard(board)
+  if playdate.buttonIsPressed( playdate.kButtonA ) and playdate.buttonIsPressed( playdate.kButtonB ) then
+      -- function board:update()
+      -- end
+      return
+  end
+    if playdate.buttonIsPressed( playdate.kButtonUp ) then
+        moveSelected('up', -1, 0, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonRight ) then
+        moveSelected('right', 0, 1, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonDown ) then
+        moveSelected('down', 1, 0, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonLeft ) then
+        moveSelected('left', 0, -1, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonA ) and not playdate.buttonIsPressed( playdate.kButtonB ) and not playdate.buttonJustPressed(playdate.kButtonA) then
+        incrementSelected('a',1, board)
+    end
+    if playdate.buttonIsPressed( playdate.kButtonB ) and not playdate.buttonIsPressed( playdate.kButtonA ) and not playdate.buttonJustPressed(playdate.kButtonB) then
+        incrementSelected('b',-1, board)
+    end
+end
+
+
