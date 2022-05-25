@@ -28,8 +28,7 @@ movespeed = 200
 settings = {
   ["Dark Mode"]=false,
   ["Highlight same sumber as selected"] = false,
-  ["Indicate where number can't go"] = false,
-  ["Show Instructions"]=false
+  ["Indicate where number can't go"] = false
 }
 function saveSettings()
   playdate.datastore.write(settings, "settings", true)
@@ -50,7 +49,6 @@ function useSettings()
     playdate.display.setInverted(false)
   end
 end
-
 setSettings()
 
 
@@ -149,13 +147,11 @@ function setUpSettingsScreen()
     local darkModeButton = {}
     local similarButton = {}
     local wrongButton = {}
-    local instructionButton = {}
     local settingsScreen = {}
     darkModeButton = setupCheckBoxAndLabel("*Dark Mode*", true, true,screenWidth / 2, screenHeight* (3/10), togglePropertyInSettings, "Dark Mode")
     similarButton = setupCheckBoxAndLabel("*Highlight Similar*", true, false, screenWidth / 2, screenHeight* (5/10), togglePropertyInSettings,  "Highlight same sumber as selected")
     wrongButton = setupCheckBoxAndLabel("*Show Blocked Boxs*", true, false, screenWidth / 2, screenHeight* (7/10), togglePropertyInSettings,  "Indicate where number can't go")
-    instructionButton = setupCheckBoxAndLabel("*Show Instructions*", true, false, screenWidth / 2, screenHeight* (9/10), togglePropertyInSettings,  "Show Instructions")
-    settingsScreen = {["title"]=titleLabel,["Buttons"]={darkModeButton,similarButton,wrongButton, instructionButton}, ["selected"]=darkModeButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
+    settingsScreen = {["title"]=titleLabel,["Buttons"]={darkModeButton,similarButton,wrongButton}, ["selected"]=darkModeButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
     }, ["backAction"] = showTitleScreen}
     handleButtonsforCheckBoxs(settingsScreen)
     return settingsScreen
@@ -183,24 +179,7 @@ end
 
 
 
-function showBoardInstrucitons()
-  local leftSide = gfx.sprite.new()
-  leftSide:add()
-  leftSide:setSize(100,465)
-  leftSide:moveTo(30,0)
-  local rightSide = gfx.sprite.new()
-  rightSide:add()
-  rightSide:setSize(100,415)
-  rightSide:moveTo(playdate.display.getWidth()-30,0)
-  function leftSide:draw(x, y, width, height)
-    -- gfx.drawRect(x,y,width,height)
-    gfx.drawTextAligned("*How To\nPlay*\n\n*D-Pad*:\nMove\n\n*A/Crank*:\nIncrease\n\n*B/Crank*:\nDecrease", x + width/2, y+ 10, kTextAlignment.center)
-  end
-  function rightSide:draw(x, y, width, height)
-    -- gfx.drawRect(x,y,width,height)
-    gfx.drawTextAligned("*Menu*:\nGo Home\nON/OFF\nGuide\n\nGame\nDetects\nWhen\nComplete", x + width/2, y+ 10, kTextAlignment.center)
-  end
-end
+
 
 
 function myGameSetUp(board)
@@ -231,23 +210,6 @@ function myGameSetUp(board)
         saveGameData(board)
         titleScreen = setUpTitleScreen()
     end)
-    local checkmarkMenuItem, error = menu:addCheckmarkMenuItem("Instructions", settings["Show Instructions"], function(value)
-        local temp = settings["Show Instructions"]
-        if temp ~= value then
-          settings["Show Instructions"] = value
-          saveSettings()
-          if settings["Show Instructions"] and not board.completed then
-            showBoardInstrucitons()
-          else
-            gfx.sprite:removeAll()
-            board:add()
-            timerLabel:add()
-          end
-        end
-    end)
-    if settings["Show Instructions"] and not board.completed then
-      showBoardInstrucitons()
-    end
 end
 
 
