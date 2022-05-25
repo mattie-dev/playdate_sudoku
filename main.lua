@@ -74,28 +74,51 @@ function setUpTitleScreen()
     gfx.sprite.removeAll()
     local screenWidth= playdate.display.getWidth() 
     local screenHeight = playdate.display.getHeight() 
-    local titleLabel = setupLabel("*Sudoku*", true, screenWidth / 2, screenHeight / 4)
+    local titleLabel = setupLabel("*Sudoku*", true, screenWidth / 2, screenHeight * (1 / 6))
     local continueButton = {}
     local newGameGameButton = {}
     local optionsButton = {}
+    local instructionButton = {}
     local titleScreen = {}
-    -- local testBoard = setUpBoard(1)
-    -- saveGameData(testBoard)
     if playdate.datastore.read("board_table") ~= nil then
-      continueButton = setupButton("*Continue*", true, true,screenWidth / 2, screenHeight* (5/10), resumeGame)
-      newGameGameButton = setupButton("*New Game*", true, false, screenWidth / 2, screenHeight* (7/10), showDifficultyScreen)
+      continueButton = setupButton("*Continue*", true, true,screenWidth / 2, screenHeight* (3/10), resumeGame)
+      newGameGameButton = setupButton("*New Game*", true, false, screenWidth / 2, screenHeight* (5/10), showDifficultyScreen)
+      instructionButton = setupButton("*Instruction*", true, false, screenWidth / 2, screenHeight* (7/10), showInstructionScreen)
       settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (9/10), showSettingsScreen)
-      titleScreen = {["title"]=titleLabel,["Buttons"]={continueButton,newGameGameButton,settingsButton}, ["selected"]=continueButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
+      titleScreen = {["title"]=titleLabel,["Buttons"]={continueButton,newGameGameButton,instructionButton,settingsButton}, ["selected"]=continueButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
       }, ["backAction"] = useless}
     else
       newGameGameButton = setupButton("*New Game*", true, true, screenWidth / 2, screenHeight* (5/10), showDifficultyScreen)
-      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (7/10), showSettingsScreen)
-      titleScreen = {["title"]=titleLabel,["Buttons"]={newGameGameButton,settingsButton}, ["selected"]=newGameGameButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
+      instructionButton = setupButton("*Instruction*", true, false, screenWidth / 2, screenHeight* (7/10), showInstructionScreen)
+      settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (9/10), showSettingsScreen)
+      titleScreen = {["title"]=titleLabel,["Buttons"]={newGameGameButton,instructionButton,settingsButton}, ["selected"]=newGameGameButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
       }, ["backAction"] = useless}
     end
         handleButtonsforbuttons(titleScreen)
     return titleScreen
 end
+
+function setUpInstructionScreen()
+    menu:removeAllMenuItems()
+    gfx.sprite.removeAll()
+    local screenWidth= playdate.display.getWidth() 
+    local screenHeight = playdate.display.getHeight() 
+    local titleLabel = setupLabel("*How to Play*", true, screenWidth / 2, screenHeight * (1/ 7) )
+    local label1 = setupLabel("*A/B or crank* - increase/decrase Number", true, screenWidth / 2, screenHeight*(2/7) )
+    local label2 = setupLabel("*D-Pad* - Move Selected Cell", true, screenWidth / 2, screenHeight*(3/7) )
+    local label3 = setupLabel("*Menu* - Go Home", true, screenWidth / 2, screenHeight*(4/7) )
+    local label4 = setupLabel("*Game auto saves*", true, screenWidth / 2, screenHeight*(5/7))
+    local label5 = setupLabel("Game auto dectects when you win", false, screenWidth / 2, screenHeight*(6/7))
+    local label6 = setupLabel("and returns you home", false, screenWidth / 2, screenHeight*(6.5/7))
+    local instructionScreen = {["title"]=titleLabel, ["backAction"] = showTitleScreen}
+   function titleLabel:update()
+     if playdate.buttonJustPressed( playdate.kButtonB ) then
+      instructionScreen.backAction()
+    end
+   end
+    return instructionScreen
+end
+
 
 function setUpDifficultyScreen()
     local screenWidth= playdate.display.getWidth() 
@@ -144,10 +167,11 @@ function togglePropertyInSettings(property)
 end
 
 
-function setupLabel(text,isBold, x, y)
+function setupLabel(text,isBold, x, y,lines)
+  lines = lines or 1
     local label = gfx.sprite.new()
     local labelWidth = gfx.getTextSize(text)
-    local labelHeight = gfx.getFont(isBold and gfx.font.kVariantBold or gfx.font.kVariantNormal):getHeight()
+    local labelHeight = gfx.getFont(isBold and gfx.font.kVariantBold or gfx.font.kVariantNormal):getHeight() * (lines)
     label:add()
     label:setSize(labelWidth, labelHeight)
     label:moveTo(x, y)
@@ -204,8 +228,8 @@ function myGameSetUp(board)
     end
     local menuItem, error = menu:addMenuItem("Sudoku Home", function()
       boardTimer:remove()
-        titleScreen = setUpTitleScreen()
         saveGameData(board)
+        titleScreen = setUpTitleScreen()
     end)
     local checkmarkMenuItem, error = menu:addCheckmarkMenuItem("Instructions", settings["Show Instructions"], function(value)
         local temp = settings["Show Instructions"]
@@ -295,6 +319,10 @@ end
 function showSettingsScreen()
   gfx.sprite.removeAll()
   settingsScreen = setUpSettingsScreen()
+end
+function showInstructionScreen()
+  gfx.sprite.removeAll()
+  instructionScreen = setUpInstructionScreen()
 end
 function showTitleScreen()
   gfx.sprite.removeAll()
