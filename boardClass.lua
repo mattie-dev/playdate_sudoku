@@ -31,6 +31,7 @@ function generateBoard(template,timeSpent)
                 ["row"]=r,
                 ["column"]=c,
                 ["number"]=numbers[n] ~= "." and numbers[n] or 0,
+                ["possible"]={},
                 ["status"]=numbers[n] ~= "." and status["Given"] or status["Empty"],
                 ["bigBox"]=findBigBoxGivenRowAndColumn(r,c)
             }
