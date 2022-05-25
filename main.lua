@@ -456,6 +456,11 @@ function incrementSelected(bool,amountToAdd, board)
 end
 
 function handleButtonsforBoard(board)
+  if playdate.buttonIsPressed( playdate.kButtonA ) and playdate.buttonIsPressed( playdate.kButtonB ) then
+      -- function board:update()
+      -- end
+      return
+  end
     if playdate.buttonIsPressed( playdate.kButtonUp ) then
         moveSelected('up', -1, 0, board)
     end
@@ -468,10 +473,10 @@ function handleButtonsforBoard(board)
     if playdate.buttonIsPressed( playdate.kButtonLeft ) then
         moveSelected('left', 0, -1, board)
     end
-    if playdate.buttonIsPressed( playdate.kButtonA ) then
+    if playdate.buttonIsPressed( playdate.kButtonA ) and not playdate.buttonIsPressed( playdate.kButtonB ) and not playdate.buttonJustPressed(playdate.kButtonA) then
         incrementSelected('a',1, board)
     end
-    if playdate.buttonIsPressed( playdate.kButtonB ) then
+    if playdate.buttonIsPressed( playdate.kButtonB ) and not playdate.buttonIsPressed( playdate.kButtonA ) and not playdate.buttonJustPressed(playdate.kButtonB) then
         incrementSelected('b',-1, board)
     end
 end
