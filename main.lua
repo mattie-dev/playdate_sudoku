@@ -106,31 +106,18 @@ function setUpDifficultyScreen()
     local hardButton = {}
     local veryHardButton = {}
     local difficutlyScreen = {}
-    local diff = 1
-    easyButton = setupButton("*Easy*", true, true,screenWidth / 2, screenHeight* (3/10), easyButtonPressed)
-    normalButton = setupButton("*Normal*", true, false, screenWidth / 2, screenHeight* (5/10), normalButtonPressed)
-    hardButton = setupButton("*Hard*", true, false, screenWidth / 2, screenHeight* (7/10), hardButtonPressed)
-    veryHardButton = setupButton("*Very Hard*", true, false, screenWidth / 2, screenHeight* (9/10), veryHardButtonPressed)
+    -- local testBoard = setUpBoard(1)
+    -- saveGameData(testBoard)
+    easyButton = setupButton("*Easy*", true, true,screenWidth / 2, screenHeight* (3/10), startNewGame)
+    normalButton = setupButton("*Normal*", true, false, screenWidth / 2, screenHeight* (5/10), startNewGame)
+    hardButton = setupButton("*Hard*", true, false, screenWidth / 2, screenHeight* (7/10), startNewGame)
+    veryHardButton = setupButton("*Very Hard*", true, false, screenWidth / 2, screenHeight* (9/10), startNewGame)
     difficutlyScreen = {["title"]=titleLabel,["Buttons"]={easyButton,normalButton,hardButton, veryHardButton}, ["selected"]=easyButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = false,["b"] = true
-    }, ["backAction"] = showTitleScreen}
+    },["difficulty"]=1, ["backAction"] = showTitleScreen}
     handleButtonsforbuttons(difficutlyScreen)
     playdate.timer.new(movespeed,setBoolToTrue, "a", difficutlyScreen)
     return difficutlyScreen
 end
-
-function easyButtonPressed(s)
-  startNewGame(1)
-end
-function normalButtonPressed(s)
-  startNewGame(2)
-end
-function hardButtonPressed(s)
-  startNewGame(3)
-end
-function veryHardButtonPressed(s)
-  startNewGame(4)
-end
-
 
 function setUpSettingsScreen()
     local screenWidth= playdate.display.getWidth() 
@@ -243,7 +230,7 @@ end
 
 function setUpBoard(diff)
     local file_number = math.random(1,10)
-    -- local random_difficutly = math.random(1,4)
+    local random_difficutly = math.random(1,4)
     -- local file_name = "puzzles/"..difficutly[random_difficutly]..file_number..".json"
     local file_name = "puzzles/"..difficutly[diff]..file_number..".json"
     local simple_file = playdate.file.open(file_name)
@@ -346,9 +333,10 @@ end
 
 
 
-function startNewGame(diff)
+function startNewGame(screen)
   gfx.sprite.removeAll()
-  mainBoard = setUpBoard(diff)
+  local dif = screen.difficulty ~= nil and screen.difficulty or 1
+  mainBoard = setUpBoard(dif)
   myGameSetUp(mainBoard)
 end
 function resumeGame()
@@ -614,7 +602,6 @@ end
 function playdate.deviceWillLock()
   saveGameData(mainBoard)
 end
-
 
 
 
