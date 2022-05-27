@@ -402,6 +402,7 @@ function reSetUpBoard(oldBoard)
     mainBoard.boardData = generateBoard(template,oldBoard.boardData.timeInSeconds)
     for i=1,81 do
       mainBoard.boardData.boxs[i].status = oldBoard.boardData.boxs[i].status
+      mainBoard.boardData.boxs[i].possible = oldBoard.boardData.boxs[i].possible
     end
     setDrawForBoardSprite(mainBoard)
     setUpdateForBoard(mainBoard)
