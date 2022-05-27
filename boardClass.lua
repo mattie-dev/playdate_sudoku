@@ -64,7 +64,7 @@ function generateBoard(template,timeSpent)
     -- board.possibleSprite = gfx.sprite.new()
     -- board.possibleSprite.selected = 1
     board.isNoting = false
-    board.possibleSelected = 1
+    board.possibleSelected = 5
     playdate.timer.new(movespeed,setBoolToTrue, "a", board)
     return board
 end
@@ -422,6 +422,7 @@ function turnOffNotingMode(bool, board)
     board.boardData.buttonCanBePressed[bool] = false
     playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
     board.boardData.isNoting = false
+    board.boardData.possibleSelected = 5
     board:markDirty()
   end
 end
