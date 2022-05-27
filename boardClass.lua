@@ -61,6 +61,10 @@ function generateBoard(template,timeSpent)
     }
     board.timeInSeconds = timeSpent or 0
     board.completed = false
+    -- board.possibleSprite = gfx.sprite.new()
+    -- board.possibleSprite.selected = 1
+    board.isNoting = false
+    board.possibleSelected = 1
     playdate.timer.new(movespeed,setBoolToTrue, "a", board)
     return board
 end
@@ -71,7 +75,8 @@ function setDrawForBoardSprite(boardSprite)
     function boardSprite:draw(x, y, width, height)
         gfx.setColor(gfx.kColorBlack == gfx.getBackgroundColor() and gfx.kColorWhite or gfx.kColorBlack)
         local thickLineWidth, thinLineWidth = 5, 1
-        local smallBoxWidth, smallBoxHeight = width/9, height/9
+        local smallBoxWidth = width/9 
+        local smallBoxHeight = height/9
         gfx.setLineWidth(thickLineWidth)
         gfx.drawRect(0, 0, width, height)
         -- Draw Thick Lines
@@ -93,23 +98,17 @@ function setDrawForBoardSprite(boardSprite)
         gfx.drawLine((5*width)/9,0,(5*width)/9,height)
         gfx.drawLine((7*width)/9,0,(7*width)/9,height)
         gfx.drawLine((8*width)/9,0,(8*width)/9,height)
-        -- gfx.setColor(gfx.kColorBlack)
-        if self.boardData.selected ~= nil then
+        if self.boardData.selected ~= nil  and not self.boardData.isNoting then
             local selectedx, selectedy = ((self.boardData.selected.column-1)*smallBoxWidth), ((self.boardData.selected.row-1)*smallBoxHeight)
             playdate.graphics.fillRect(selectedx, selectedy, smallBoxWidth+1, smallBoxHeight+1)
         end
         for index=1, 81 do
-            local sbx, sby = ((self.boardData.boxs[index].column-1)*smallBoxWidth), ((self.boardData.boxs[index].row-1)*smallBoxHeight)
-            local text = self.boardData.boxs[index].number ~= 0 and self.boardData.boxs[index].number or ''
-            if self.boardData.boxs[index].status == status["Given"] then
-                local textWidth = gfx.getTextSize("*"..text)
-                local textHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()
-                gfx.drawText("*"..text, sbx + (smallBoxWidth/2 - textWidth/2), sby+(smallBoxHeight - textHeight)) 
-            else
-                local textWidth = gfx.getTextSize(text)
-                local textHeight = gfx.getFont():getHeight()
-                gfx.drawText(text,sbx+ (smallBoxWidth/2 - textWidth/2),sby+(smallBoxHeight - textHeight))
+            local sbx = ((self.boardData.boxs[index].column-1)*smallBoxWidth)
+            local sby = ((self.boardData.boxs[index].row-1)*smallBoxHeight)
+            if self.boardData.boxs[index].number == 0 then
+              drawPossibleNumbersForSmallBox(sbx,sby,smallBoxWidth,smallBoxHeight,self.boardData,index)
             end
+            drawSmallBoxNumber(self.boardData,sbx,sby,smallBoxWidth,smallBoxHeight,index)
             if settings["Highlight same sumber as selected"] and self.boardData.selected ~= nil then
                 highlightSameNumber(self, index, thickLineWidth, sbx, sby, smallBoxWidth, smallBoxHeight)
             end
@@ -122,6 +121,85 @@ function setDrawForBoardSprite(boardSprite)
     return boardSprite
 end
 
+function drawSmallBoxNumber(boardData,x,y,width,height,index)
+  local text = boardData.boxs[index].number ~= 0 and boardData.boxs[index].number or ''
+  if boardData.boxs[index].status == status["Given"] then
+      local textWidth = gfx.getTextSize("*"..text)
+      local textHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()
+      gfx.drawTextAligned("*"..text,x + (width/2), y+(height - textHeight),kTextAlignment.center)
+  else
+      local textWidth = gfx.getTextSize(text)
+      local textHeight = gfx.getFont():getHeight()
+      gfx.drawTextAligned(text,x + (width/2 ), y+(height - textHeight),kTextAlignment.center)
+  end
+end
+
+
+function drawPossibleNumbersForSmallBox(x,y,width,height, boardData,index)
+  local originalSystemFont = gfx.getSystemFont()
+  local possibleNumberFont = gfx.font.new("font-Bitmore")
+  gfx.setFont(possibleNumberFont)
+  local x1,x2,x3 = x+width*(1/6), x+width*(3/6), x+width*(5/6)
+  local y1,y2, y3 = y+height*(1/12), y+height*(5/12), y+height*(9/12)
+  local w1 = width*(1/3)
+  local w2 = width*(2/3)
+  local w3 = width*(3/3)
+  local h1 = height*(1/3)
+  local h2 = height*(2/3)
+  local h3 = height*(3/3)
+  if boardData.isNoting and boardData.selected == boardData.boxs[index] then
+    if boardData.possibleSelected == 1 then
+      gfx.fillRect(x,y,w1,h1)
+    elseif boardData.possibleSelected == 2 then
+      gfx.fillRect(x+w1,y,w1,h1)
+    elseif boardData.possibleSelected == 3 then
+      gfx.fillRect(x+w2,y,w1,h1)
+    elseif boardData.possibleSelected == 4 then
+      gfx.fillRect(x,y+h1,w1,h1)
+    elseif boardData.possibleSelected == 5 then
+      gfx.fillRect(x+w1,y+h1,w1,h1)
+    elseif boardData.possibleSelected == 6 then
+      gfx.fillRect(x+w2,y+h1,w1,h1)
+    elseif boardData.possibleSelected == 7 then
+      gfx.fillRect(x,y+h2,w1,h1)
+    elseif boardData.possibleSelected == 8 then
+      gfx.fillRect(x+w1,y+h2,w1,h1)
+    elseif boardData.possibleSelected == 9 then
+      gfx.fillRect(x+w2,y+h2,w1,h1)
+    end
+  end
+  if boardData.boxs[index].possible[1] then
+      gfx.drawTextAligned("1",x1,y1,kTextAlignment.center)
+  end
+  if boardData.boxs[index].possible[2] then
+      gfx.drawTextAligned("2",x2,y1,kTextAlignment.center)
+  end
+  if boardData.boxs[index].possible[3] then
+      gfx.drawTextAligned("3",x3,y1,kTextAlignment.center)
+  end
+  
+  if boardData.boxs[index].possible[4] then
+      gfx.drawTextAligned("4",x1,y2,kTextAlignment.center)
+  end
+  if boardData.boxs[index].possible[5] then
+      gfx.drawTextAligned("5",x2,y2,kTextAlignment.center)
+  end
+  if boardData.boxs[index].possible[6] then
+      gfx.drawTextAligned("6",x3,y2,kTextAlignment.center)
+  end
+  
+  if boardData.boxs[index].possible[7] then
+      gfx.drawTextAligned("7",x1,y3,kTextAlignment.center)
+  end
+  if boardData.boxs[index].possible[8] then
+      gfx.drawTextAligned("8",x2,y3,kTextAlignment.center)
+  end
+  if boardData.boxs[index].possible[9] then
+      gfx.drawTextAligned("9",x3,y3,kTextAlignment.center)
+  end
+  gfx.setFont(originalSystemFont)
+end
+
 
 function highlightSameNumber(board, index, thickLineWidth, sbx, sby, smallBoxWidth, smallBoxHeight)
     if tonumber(board.boardData.selected.number) == tonumber(board.boardData.boxs[index].number) and board.boardData.selected.number ~= 0 then
@@ -131,7 +209,7 @@ end
 
 
 function indicateSpotsNumberCanNotGo(board, index, sbx, sby, smallBoxWidth, smallBoxHeight)
-    if board.boardData.boxs[index].status == status["Empty"] and board.boardData.selected.status ~= status["Empty"] then
+    if board.boardData.boxs[index].status == status["Empty"] and board.boardData.selected.status ~= status["Empty"] and not board.boardData.boxs[index].possible[math.floor(board.boardData.selected.number)] then
         local shouldDraw = false
         for j=1, 9 do
             local r = board.boardData.rows[board.boardData.boxs[index].row][j]
@@ -155,6 +233,74 @@ function indicateSpotsNumberCanNotGo(board, index, sbx, sby, smallBoxWidth, smal
         end
     end
 end
+
+function showPossibleNumberSelector(boardData,board)
+    if boardData.selected ~= nil and boardData.selected.status ~= status.Given then
+        function board:update()
+        end
+        local midpointx = playdate.display.getWidth() / 2
+        local midpointy = playdate.display.getHeight() / 2
+        local boardSize = (playdate.display.getHeight() *.95) / 2
+        -- printTable(boardData.selected.possible)
+        local possibleSize = midpointx - (boardSize * 1.05)
+        boardData.possibleSprite:setSize(possibleSize,possibleSize)
+        boardData.possibleSprite:moveTo(midpointx/4.6,midpointy+1)
+        boardData.possibleSprite:add()
+        function boardData.possibleSprite:draw(x, y, width, height)
+            gfx.drawRect(x,y,width,height)
+            gfx.drawLine(x+width/3,y,x+width/3,y+height)
+            gfx.drawLine(x+width*(2/3),y,x+width*(2/3),y+height)
+            gfx.drawLine(x,y+height*(1/3),x+width,y+height*(1/3))
+            gfx.drawLine(x,y+height*(2/3),x+width,y+height*(2/3))
+            local originalSystemFont = gfx.getSystemFont()
+            print(originalSystemFont)
+            local possibleNumberFont = gfx.font.new("font-Bitmore")
+            gfx.setFont(possibleNumberFont)
+            print(gfx.getSystemFont())
+            if boardData.selected.possible[1] then
+                gfx.drawTextAligned("1",x+width*(1/6),y+height*(1/12),kTextAlignment.center)
+            end
+            if boardData.selected.possible[2] then
+                gfx.drawTextAligned("2",x+width*(3/6),y+height*(1/12),kTextAlignment.center)
+            end
+            if boardData.selected.possible[3] then
+                gfx.drawTextAligned("3",x+width*(5/6),y+height*(1/12),kTextAlignment.center)
+            end
+            
+            if boardData.selected.possible[4] then
+                gfx.drawTextAligned("4",x+width*(1/6),y+height*(5/12),kTextAlignment.center)
+            end
+            if boardData.selected.possible[5] then
+                gfx.drawTextAligned("5",x+width*(3/6),y+height*(5/12),kTextAlignment.center)
+            end
+            if boardData.selected.possible[6] then
+                gfx.drawTextAligned("6",x+width*(5/6),y+height*(5/12),kTextAlignment.center)
+            end
+            
+            if boardData.selected.possible[7] then
+                gfx.drawTextAligned("7",x+width*(1/6),y+height*(9/12),kTextAlignment.center)
+            end
+            if boardData.selected.possible[8] then
+                gfx.drawTextAligned("8",x+width*(3/6),y+height*(9/12),kTextAlignment.center)
+            end
+            if boardData.selected.possible[9] then
+                gfx.drawTextAligned("9",x+width*(5/6),y+height*(9/12),kTextAlignment.center)
+            end
+            gfx.setFont(originalSystemFont)
+        end
+        function boardData.possibleSprite:update()
+            if playdate.buttonJustPressed( playdate.kButtonB ) then
+                boardData.possibleSprite:remove()
+                board.boardData.buttonCanBePressed["b"] = false
+                playdate.timer.new(movespeed,setBoolToTrue, "b", board.boardData)
+                setUpdateForBoard(board) 
+            end
+        end
+    else
+        boardData.possibleSprite:remove()
+    end
+end
+
 
 function findBigBoxGivenRowAndColumn(row,column)
     if row < 4 and column < 4 then
@@ -262,101 +408,176 @@ function reSetUpBoard(oldBoard)
     return mainBoard
 end
 
+function turnOnNotingMode(bool, board)
+  if board.boardData.buttonCanBePressed[bool] then
+    board.boardData.buttonCanBePressed[bool] = false
+    playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
+    board.boardData.isNoting = true
+    board:markDirty()
+  end
+end
+function turnOffNotingMode(bool, board)
+  if board.boardData.buttonCanBePressed[bool] then
+    board.boardData.buttonCanBePressed[bool] = false
+    playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
+    board.boardData.isNoting = false
+    board:markDirty()
+  end
+end
+
 function moveSelected(bool,rowMove, columnMove,board)
-    if board.boardData.buttonCanBePressed[bool] then
-        board.boardData.buttonCanBePressed[bool] = false
-        playdate.timer.new(movespeed,setBoolToTrue, bool, board.boardData)
-        local newRow = board.boardData.selected.row + rowMove
-        if newRow <1 then
-            newRow = 9
-        elseif newRow > 9 then
-            newRow = 1
-        end
-        local newColumn = board.boardData.selected.column + columnMove
-        if newColumn <1 then
-            newColumn = 9
-        elseif newColumn > 9 then
-            newColumn = 1
-        end
-        board.boardData.selected = board.boardData.rows[newRow][newColumn]
-        board:markDirty()
+  if not board.boardData.isNoting then
+      if board.boardData.buttonCanBePressed[bool] then
+          board.boardData.buttonCanBePressed[bool] = false
+          playdate.timer.new(movespeed,setBoolToTrue, bool, board.boardData)
+          local newRow = board.boardData.selected.row + rowMove
+          if newRow <1 then
+              newRow = 9
+          elseif newRow > 9 then
+              newRow = 1
+          end
+          local newColumn = board.boardData.selected.column + columnMove
+          if newColumn <1 then
+              newColumn = 9
+          elseif newColumn > 9 then
+              newColumn = 1
+          end
+          board.boardData.selected = board.boardData.rows[newRow][newColumn]
+          board:markDirty()
+      end
+    end
+end
+
+function movePossibleSelected(bool,rowMove, columnMove,board)
+  if board.boardData.isNoting then
+      if board.boardData.buttonCanBePressed[bool] then
+          board.boardData.buttonCanBePressed[bool] = false
+          playdate.timer.new(movespeed,setBoolToTrue, bool, board.boardData)
+          local temp = board.boardData.possibleSelected
+          if rowMove == 1 then
+            if temp < 7 then
+              board.boardData.possibleSelected = temp + 3
+            else
+              board.boardData.possibleSelected = temp - 6
+            end
+          elseif rowMove == -1 then
+            if temp > 3 then
+              board.boardData.possibleSelected = temp - 3
+            else
+              board.boardData.possibleSelected = temp + 6
+            end
+          elseif columnMove == 1 then
+            if temp % 3 ~= 0 then
+              board.boardData.possibleSelected = temp + 1
+            else
+              board.boardData.possibleSelected = temp - 2
+            end
+          elseif columnMove == -1 then
+            if temp % 3 ~= 1 then
+              board.boardData.possibleSelected = temp - 1
+            else
+              board.boardData.possibleSelected = temp + 2
+            end
+          end
+          board:markDirty()
+      end
     end
 end
 
 function incrementSelected(bool,amountToAdd, board)
-  if board.boardData.buttonCanBePressed[bool] then
-      board.boardData.buttonCanBePressed[bool] = false
-      playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
-      if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
-          local newNumber = board.boardData.selected.number + amountToAdd
-          board.boardData.selected.status = status["Guessed"]
-          if newNumber > 9 then
-            newNumber = 0
-            board.boardData.selected.status = status["Empty"]
-          elseif newNumber == 0 then
-            newNumber = 0
-            board.boardData.selected.status = status["Empty"]
-          elseif newNumber < 0 then
-            newNumber = 9
-          end
-          board.boardData.selected.number = newNumber
-          
-          board:markDirty()
-      end
-      if checkIfBoardIsFinishedAndValid(board) then
-        finshedBoard(board)
-      end
-  end  
+  if not board.boardData.isNoting then
+    if board.boardData.buttonCanBePressed[bool] then
+        board.boardData.buttonCanBePressed[bool] = false
+        playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
+        if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
+            local newNumber = board.boardData.selected.number + amountToAdd
+            board.boardData.selected.status = status["Guessed"]
+            if newNumber > 9 then
+              newNumber = 0
+              board.boardData.selected.status = status["Empty"]
+            elseif newNumber == 0 then
+              newNumber = 0
+              board.boardData.selected.status = status["Empty"]
+            elseif newNumber < 0 then
+              newNumber = 9
+            end
+            board.boardData.selected.number = newNumber
+            
+            board:markDirty()
+        end
+        if checkIfBoardIsFinishedAndValid(board) then
+          finshedBoard(board)
+        end
+    end  
+  end
 end
 function incrementSelectedWithCarnk(bool,amountToAdd, board)
-  if board.boardData.buttonCanBePressed[bool] then
-      -- board.boardData.buttonCanBePressed[bool] = false
+  if not board.boardData.isNoting then
+    if board.boardData.buttonCanBePressed[bool] then
+        -- board.boardData.buttonCanBePressed[bool] = false
+        playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
+        if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
+            local newNumber = board.boardData.selected.number + amountToAdd
+            board.boardData.selected.status = status["Guessed"]
+            if newNumber > 9 then
+              newNumber = 0
+              board.boardData.selected.status = status["Empty"]
+            elseif newNumber == 0 then
+              newNumber = 0
+              board.boardData.selected.status = status["Empty"]
+            elseif newNumber < 0 then
+              newNumber = 9
+            end
+            board.boardData.selected.number = newNumber
+            
+            board:markDirty()
+        end
+    end  
+    if checkIfBoardIsFinishedAndValid(board) then
+      finshedBoard(board)
+    end
+  end
+end
+
+function togglePossibleNumber(bool,board)
+  if board.boardData.isNoting and board.boardData.selected.status == status.Empty then
+    if board.boardData.buttonCanBePressed[bool] then
+      board.boardData.buttonCanBePressed[bool] = false
       playdate.timer.new(movespeed,setBoolToTrue,bool,board.boardData)
-      if board.boardData.selected.status == status["Empty"] or board.boardData.selected.status == status["Guessed"] then
-          local newNumber = board.boardData.selected.number + amountToAdd
-          board.boardData.selected.status = status["Guessed"]
-          if newNumber > 9 then
-            newNumber = 0
-            board.boardData.selected.status = status["Empty"]
-          elseif newNumber == 0 then
-            newNumber = 0
-            board.boardData.selected.status = status["Empty"]
-          elseif newNumber < 0 then
-            newNumber = 9
-          end
-          board.boardData.selected.number = newNumber
-          
-          board:markDirty()
-      end
-  end  
-  if checkIfBoardIsFinishedAndValid(board) then
-    finshedBoard(board)
+      board.boardData.selected.possible[board.boardData.possibleSelected] = not board.boardData.selected.possible[board.boardData.possibleSelected]
+      board:markDirty()
+    end
   end
 end
 
 function handleButtonsforBoard(board)
-  if playdate.buttonIsPressed( playdate.kButtonA ) and playdate.buttonIsPressed( playdate.kButtonB ) then
-      -- function board:update()
-      -- end
+  if playdate.buttonJustPressed( playdate.kButtonA ) and playdate.buttonJustPressed( playdate.kButtonB ) then
+      turnOnNotingMode('a',board)
       return
   end
     if playdate.buttonIsPressed( playdate.kButtonUp ) then
         moveSelected('up', -1, 0, board)
+        movePossibleSelected('up', -1, 0, board)
     end
     if playdate.buttonIsPressed( playdate.kButtonRight ) then
         moveSelected('right', 0, 1, board)
+        movePossibleSelected('right', 0, 1, board)
     end
     if playdate.buttonIsPressed( playdate.kButtonDown ) then
         moveSelected('down', 1, 0, board)
+        movePossibleSelected('down', 1, 0, board)
     end
     if playdate.buttonIsPressed( playdate.kButtonLeft ) then
         moveSelected('left', 0, -1, board)
+        movePossibleSelected('left', 0, -1, board)
     end
-    if playdate.buttonIsPressed( playdate.kButtonA ) and not playdate.buttonIsPressed( playdate.kButtonB ) and not playdate.buttonJustPressed(playdate.kButtonA) then
+    if playdate.buttonIsPressed( playdate.kButtonA ) and not playdate.buttonIsPressed( playdate.kButtonB )  and not playdate.buttonJustPressed(playdate.kButtonA) then
         incrementSelected('a',1, board)
+        togglePossibleNumber('a',board)
     end
-    if playdate.buttonIsPressed( playdate.kButtonB ) and not playdate.buttonIsPressed( playdate.kButtonA ) and not playdate.buttonJustPressed(playdate.kButtonB) then
+    if playdate.buttonIsPressed( playdate.kButtonB ) and not playdate.buttonIsPressed( playdate.kButtonA )  and not playdate.buttonJustPressed(playdate.kButtonB) then
         incrementSelected('b',-1, board)
+        turnOffNotingMode('b',board)
     end
 end
 

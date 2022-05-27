@@ -53,6 +53,7 @@ setSettings()
 
 
 
+
 function saveGameData(board)
   if board ~=nil then
     playdate.datastore.write(board, "board_table", true) 
@@ -66,6 +67,21 @@ function useless()
 end
 -- removeGameData()
 
+
+function allTrue(t)
+    for _, v in pairs(t) do
+        if not v then return false end
+    end
+
+    return true
+end
+function allFalse(t)
+    for _, v in pairs(t) do
+        if v then return false end
+    end
+
+    return true
+end
 
 function setUpTitleScreen()
     menu:removeAllMenuItems()
