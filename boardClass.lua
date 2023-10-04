@@ -4,6 +4,7 @@ import "CoreLibs/sprites"
 import "CoreLibs/timer"
 
 local gfx <const> = playdate.graphics
+local possibleNumberFont = gfx.font.new("font-Bitmore")
 
 status = {
     ["Given"] = 1,
@@ -137,7 +138,7 @@ end
 
 function drawPossibleNumbersForSmallBox(x,y,width,height, boardData,index)
   local originalSystemFont = gfx.getSystemFont()
-  local possibleNumberFont = gfx.font.new("font-Bitmore")
+  -- local possibleNumberFont = gfx.font.new("font-Bitmore")
   gfx.setFont(possibleNumberFont)
   local x1,x2,x3 = x+width*(1/6), x+width*(3/6), x+width*(5/6)
   local y1,y2, y3 = y+height*(1/12), y+height*(5/12), y+height*(9/12)
@@ -254,7 +255,7 @@ function showPossibleNumberSelector(boardData,board)
             gfx.drawLine(x,y+height*(2/3),x+width,y+height*(2/3))
             local originalSystemFont = gfx.getSystemFont()
             print(originalSystemFont)
-            local possibleNumberFont = gfx.font.new("font-Bitmore")
+            -- local possibleNumberFont = gfx.font.new("font-Bitmore")
             gfx.setFont(possibleNumberFont)
             print(gfx.getSystemFont())
             if boardData.selected.possible[1] then
