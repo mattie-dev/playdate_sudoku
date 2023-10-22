@@ -64,6 +64,8 @@ end
 function removeGameData()
     playdate.datastore.delete("board_table") 
 end
+function doNothing()
+end
 
 -- removeGameData()
 
@@ -107,13 +109,13 @@ function setUpTitleScreen()
       instructionButton = setupButton("*Instruction*", true, false, screenWidth / 2, screenHeight* (7/10), showInstructionScreen)
       settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (9/10), showSettingsScreen)
       titleScreen = {["title"]=titleLabel,["Buttons"]={continueButton,newGameGameButton,instructionButton,settingsButton}, ["selected"]=continueButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
-      }, ["backAction"] = useless}
+      }, ["backAction"] = doNothing}
     else
       newGameGameButton = setupButton("*New Game*", true, true, screenWidth / 2, screenHeight* (5/10), showDifficultyScreen)
       instructionButton = setupButton("*Instruction*", true, false, screenWidth / 2, screenHeight* (7/10), showInstructionScreen)
       settingsButton = setupButton("*Settings*", true, false, screenWidth / 2, screenHeight* (9/10), showSettingsScreen)
       titleScreen = {["title"]=titleLabel,["Buttons"]={newGameGameButton,instructionButton,settingsButton}, ["selected"]=newGameGameButton,["buttonCanBePressed"] = {["up"] = true,["down"] = true,["left"] = true,["right"] = true,["a"] = true,["b"] = true
-      }, ["backAction"] = useless}
+      }, ["backAction"] = doNothing}
     end
         handleButtonsforbuttons(titleScreen)
     return titleScreen
