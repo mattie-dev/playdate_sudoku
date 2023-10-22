@@ -86,6 +86,11 @@ end
 function setUpTitleScreen()
     menu:removeAllMenuItems()
     gfx.sprite.removeAll()
+    for _, timer in pairs(playdate.timer.allTimers()) do
+      timer:remove()
+      removeGameData() --inefficient, but it's unlikely to have more than 1, 'congratulations', timer
+    end
+    
     local screenWidth= playdate.display.getWidth() 
     local screenHeight = playdate.display.getHeight() 
     local titleLabel = setupLabel("*Sudoku*", true, screenWidth / 2, screenHeight * (1 / 6))
