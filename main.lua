@@ -10,6 +10,7 @@ import "checkBoxButtons"
 local gfx <const> = playdate.graphics
 local menu = playdate.getSystemMenu()
 
+local congratulationsTimer = nil
 
 gfx.setImageDrawMode(gfx.kDrawModeNXOR)
 gfx.setBackgroundColor(gfx.kColorWhite)
@@ -58,13 +59,12 @@ function saveGameData(board)
   if board ~=nil then
     playdate.datastore.write(board, "board_table", true) 
   end
-  
 end
+
 function removeGameData()
     playdate.datastore.delete("board_table") 
 end
-function useless()
-end
+
 -- removeGameData()
 
 
@@ -86,6 +86,12 @@ end
 function setUpTitleScreen()
     menu:removeAllMenuItems()
     gfx.sprite.removeAll()
+    
+    if congratulationsTimer ~= nil then
+      removeGameData()
+      congratulationsTimer = nil
+    end
+    
     local screenWidth= playdate.display.getWidth() 
     local screenHeight = playdate.display.getHeight() 
     local titleLabel = setupLabel("*Sudoku*", true, screenWidth / 2, screenHeight * (1 / 6))
@@ -257,37 +263,37 @@ function finshedBoard(board)
   boardTimer:remove()
   local screenWidth= playdate.display.getWidth() 
   local screenHeight = playdate.display.getHeight() 
-  local congradulatioinsLabel = gfx.sprite.new()
-  congradulatioinsLabel:add()
+  local congratulationsLabel = gfx.sprite.new()
+  congratulationsLabel:add()
   local text = "*Congradulations*"
   local labelWidth = gfx.getTextSize(text)
   local labelHeight = gfx.getFont(gfx.font.kVariantBold):getHeight()
   timerLabel:moveTo((labelWidth/2) *1.2,200)
-  congradulatioinsLabel:setSize(labelWidth*1.1,labelHeight*4.1)
-  congradulatioinsLabel:moveTo((labelWidth/2) *1.2, screenHeight/2)
-  congradulatioinsLabel.countDown = 11
+  congratulationsLabel:setSize(labelWidth*1.1,labelHeight*4.1)
+  congratulationsLabel:moveTo((labelWidth/2) *1.2, screenHeight/2)
+  congratulationsLabel.countDown = 11
   board:moveBy(labelWidth/2,0)
   board.boardData.selected = nil
   function board:update()
     
   end
-  function congradulatioinsLabel:draw(x, y, width, height)
+  function congratulationsLabel:draw(x, y, width, height)
     gfx.fillRect(x,y,width,height)
     -- gfx.drawText(text,x+labelWidth*0.05,y+labelHeight*0.05)
     gfx.drawTextAligned("*Congradulations*", x+(labelWidth/2)+(labelWidth*0.05),y+(labelHeight/2)+(labelHeight*0.05), kTextAlignment.center)
     gfx.drawTextAligned("Return Home In:", x+(labelWidth/2)+(labelWidth*0.05),y+(labelHeight/2)+(labelHeight*1.1), kTextAlignment.center)
     gfx.drawTextAligned(self.countDown, x+(labelWidth/2)+(labelWidth*0.05),y+(labelHeight/2)+(labelHeight*2.05), kTextAlignment.center)
   end
-  function congradulatioinsLabel:updateCountDown()
-    if congradulatioinsLabel.countDown >1 then
-      congradulatioinsLabel.countDown = congradulatioinsLabel.countDown-1
-      congradulatioinsLabel:markDirty()
-      playdate.timer.new(1000,congradulatioinsLabel.updateCountDown)
+  function congratulationsLabel:updateCountDown()
+    if congratulationsLabel.countDown >1 then
+      congratulationsLabel.countDown = congratulationsLabel.countDown-1
+      congratulationsLabel:markDirty()
+      congratulationsTimer = playdate.timer.new(1000,congratulationsLabel.updateCountDown)
     else
       setUpTitleScreen()
     end
   end
-  congradulatioinsLabel.updateCountDown()
+  congratulationsLabel.updateCountDown()
   -- playdate.timer.new(11000,setUpTitleScreen)
 end
 
@@ -325,5 +331,3 @@ end
 function playdate.deviceWillLock()
   saveGameData(mainBoard)
 end
-
-
