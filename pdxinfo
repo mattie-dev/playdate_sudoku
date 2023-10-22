@@ -1,7 +1,7 @@
 name=Sudoku
-author=Matthew Leiman
+author=Matthew Leiman, Roman G bugfixes
 description=A simple sudoku game with around 400,000 puzzles broken up into 4 difficulties.
 bundleID=co.leiman.playdate_sudoku
-version=.3.1
+version=.3.2
 imagePath=card
 launchSoundPath=launchImage
