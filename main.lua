@@ -10,6 +10,7 @@ import "checkBoxButtons"
 local gfx <const> = playdate.graphics
 local menu = playdate.getSystemMenu()
 
+local congratulationsTimer = nil
 
 gfx.setImageDrawMode(gfx.kDrawModeNXOR)
 gfx.setBackgroundColor(gfx.kColorWhite)
@@ -86,9 +87,10 @@ end
 function setUpTitleScreen()
     menu:removeAllMenuItems()
     gfx.sprite.removeAll()
-    for _, timer in pairs(playdate.timer.allTimers()) do
-      timer:remove()
-      removeGameData() --inefficient, but it's unlikely to have more than 1, 'congratulations', timer
+    
+    if congratulationsTimer ~= nil then
+      removeGameData()
+      congratulationsTimer = nil
     end
     
     local screenWidth= playdate.display.getWidth() 
@@ -287,7 +289,7 @@ function finshedBoard(board)
     if congradulatioinsLabel.countDown >1 then
       congradulatioinsLabel.countDown = congradulatioinsLabel.countDown-1
       congradulatioinsLabel:markDirty()
-      playdate.timer.new(1000,congradulatioinsLabel.updateCountDown)
+      congratulationsTimer = playdate.timer.new(1000,congradulatioinsLabel.updateCountDown)
     else
       setUpTitleScreen()
     end
