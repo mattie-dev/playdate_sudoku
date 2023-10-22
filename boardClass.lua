@@ -364,7 +364,7 @@ function setUpdateForBoard(board)
         local temp = playdate.getCrankTicks(4)
         if temp ~= 0 then
             local sign = findSign(temp)
-            incrementSelectedWithCarnk("crank",math.floor(sign),board)
+            incrementSelectedWithCrank("crank",math.floor(sign),board)
         end
     end
     return board
@@ -415,6 +415,7 @@ function turnOnNotingMode(bool, board)
     board.boardData.isNoting = true
     if board.boardData.selected ~= nil and board.boardData.selected.status ~= status.Given  then
       board.boardData.selected.number = 0
+      board.boardData.selected.status = status["Empty"] 
     end
     board:markDirty()
   end
@@ -516,7 +517,7 @@ function incrementSelected(bool,amountToAdd, board)
     end  
   end
 end
-function incrementSelectedWithCarnk(bool,amountToAdd, board)
+function incrementSelectedWithCrank(bool,amountToAdd, board)
   if not board.boardData.isNoting then
     if board.boardData.buttonCanBePressed[bool] then
         -- board.boardData.buttonCanBePressed[bool] = false
