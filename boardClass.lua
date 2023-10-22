@@ -415,6 +415,7 @@ function turnOnNotingMode(bool, board)
     board.boardData.isNoting = true
     if board.boardData.selected ~= nil and board.boardData.selected.status ~= status.Given  then
       board.boardData.selected.number = 0
+      board.boardData.selected.status = status["Empty"] 
     end
     board:markDirty()
   end
