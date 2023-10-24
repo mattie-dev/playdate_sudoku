@@ -91,7 +91,7 @@ function setUpTitleScreen()
     
     if congratulationsTimer ~= nil then
       removeGameData()
-      congratulationsTimer:reset()
+      congratulationsTimer:remove()
       congratulationsTimer = nil
     end
     

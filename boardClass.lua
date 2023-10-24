@@ -361,10 +361,13 @@ end
 function setUpdateForBoard(board)
     function board:update()
         handleButtonsforBoard(board)
-        local temp = playdate.getCrankTicks(4)
-        if temp ~= 0 then
-            local sign = findSign(temp)
-            incrementSelectedWithCrank("crank",math.floor(sign),board)
+        
+        if not playdate.isCrankDocked() then
+          local temp = playdate.getCrankTicks(4)
+          if temp ~= 0 then
+              local sign = findSign(temp)
+              incrementSelectedWithCrank("crank", math.floor(sign), board)
+          end
         end
     end
     return board
